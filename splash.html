@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>R1Gate Voice</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #0d0d0d 100%);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      overflow: hidden;
+      -webkit-app-region: drag;
+    }
+
+    .logo-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 24px;
+      animation: fadeIn 0.5s ease-out;
+    }
+
+    .logo {
+      width: 120px;
+      height: 120px;
+      animation: pulse 2s infinite ease-in-out;
+    }
+
+    .app-name {
+      font-size: 28px;
+      font-weight: 600;
+      color: #00C853;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    .loading-container {
+      margin-top: 40px;
+      width: 200px;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .loading-bar {
+      width: 40%;
+      height: 100%;
+      background: linear-gradient(90deg, #00C853, #00E676, #00C853);
+      border-radius: 2px;
+      animation: loading 1.5s infinite ease-in-out;
+    }
+
+    .loading-text {
+      margin-top: 16px;
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.5);
+      letter-spacing: 1px;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes pulse {
+      0%, 100% {
+        transform: scale(1);
+        filter: drop-shadow(0 0 20px rgba(0, 200, 83, 0.3));
+      }
+      50% {
+        transform: scale(1.05);
+        filter: drop-shadow(0 0 30px rgba(0, 200, 83, 0.5));
+      }
+    }
+
+    @keyframes loading {
+      0% {
+        transform: translateX(-100%);
+      }
+      50% {
+        transform: translateX(150%);
+      }
+      100% {
+        transform: translateX(400%);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="logo-container">
+    <svg class="logo" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
+      <rect width="256" height="256" rx="48" fill="#00C853"/>
+      <circle cx="77" cy="90" r="26" fill="#0D0D0D"/>
+      <circle cx="179" cy="90" r="26" fill="#0D0D0D"/>
+      <circle cx="128" cy="179" r="26" fill="#0D0D0D"/>
+      <line x1="77" y1="90" x2="179" y2="90" stroke="#0D0D0D" stroke-width="10"/>
+      <line x1="77" y1="90" x2="128" y2="179" stroke="#0D0D0D" stroke-width="10"/>
+      <line x1="179" y1="90" x2="128" y2="179" stroke="#0D0D0D" stroke-width="10"/>
+    </svg>
+    <div class="app-name">R1Gate</div>
+  </div>
+  <div class="loading-container">
+    <div class="loading-bar"></div>
+  </div>
+  <div class="loading-text">Loading...</div>
+</body>
+</html>

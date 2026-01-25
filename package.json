@@ -1,0 +1,93 @@
+{
+  "name": "r1gate-app",
+  "version": "1.0.0",
+  "description": "R1Gate Voice - Desktop Application for voice communication",
+  "main": "main.js",
+  "homepage": "https://r1gate.ru",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/r1gate/r1gate-app.git"
+  },
+  "bugs": {
+    "url": "https://github.com/r1gate/r1gate-app/issues"
+  },
+  "keywords": [
+    "voice",
+    "chat",
+    "electron",
+    "desktop",
+    "communication",
+    "discord-alternative"
+  ],
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder",
+    "build:win": "electron-builder --win",
+    "build:mac": "electron-builder --mac",
+    "build:linux": "electron-builder --linux"
+  },
+  "author": {
+    "name": "R1Gate",
+    "url": "https://r1gate.ru"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^28.0.0",
+    "electron-builder": "^24.9.1"
+  },
+  "build": {
+    "appId": "ru.r1gate.voice",
+    "productName": "R1Gate Voice",
+    "copyright": "Copyright © 2025 R1Gate",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "splash.html",
+      "icon.png",
+      "icon.svg"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64"]
+        }
+      ],
+      "icon": "icon.png",
+      "publisherName": "R1Gate"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "artifactName": "R1Gate-Voice-Setup-${version}.exe",
+      "shortcutName": "R1Gate Voice"
+    },
+    "mac": {
+      "target": [
+        {
+          "target": "dmg",
+          "arch": ["x64", "arm64"]
+        }
+      ],
+      "icon": "icon.png",
+      "category": "public.app-category.social-networking"
+    },
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb"
+      ],
+      "icon": "icon.png",
+      "category": "Network",
+      "artifactName": "R1Gate-Voice-${version}.${ext}"
+    },
+    "publish": {
+      "provider": "github",
+      "owner": "r1gate",
+      "repo": "r1gate-app"
+    }
+  }
+}
