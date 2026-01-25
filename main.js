@@ -1,6 +1,23 @@
 const { app, BrowserWindow, Tray, Menu, shell, ipcMain, desktopCapturer, session } = require('electron');
 const { autoUpdater } = require('electron-updater');
 const path = require('path');
+const fs = require('fs');
+
+// Logger - writes to app directory
+const logFile = path.join(app.getPath('userData'), 'r1gate-debug.log');
+function log(message) {
+  const timestamp = new Date().toISOString();
+  const line = `[${timestamp}] ${message}\n`;
+  console.log(line.trim());
+  try {
+    fs.appendFileSync(logFile, line);
+  } catch (e) {
+    console.error('Failed to write log:', e);
+  }
+}
+
+log('App starting...');
+log(`Log file: ${logFile}`);
 
 // Single instance lock - prevent duplicate processes
 const gotTheLock = app.requestSingleInstanceLock();
@@ -64,16 +81,21 @@ function createSplashWindow() {
 }
 
 async function checkInternetConnection() {
+  log('Checking internet connection...');
   const dns = require('dns').promises;
   try {
-    await dns.lookup('web.r1gate.ru');
+    const result = await dns.lookup('web.r1gate.ru');
+    log(`DNS lookup web.r1gate.ru: ${JSON.stringify(result)}`);
     return true;
-  } catch {
+  } catch (err) {
+    log(`DNS lookup web.r1gate.ru failed: ${err.message}`);
     // Fallback: try google
     try {
       await dns.lookup('google.com');
+      log('Fallback DNS lookup google.com: success');
       return true;
-    } catch {
+    } catch (err2) {
+      log(`Fallback DNS lookup google.com failed: ${err2.message}`);
       return false;
     }
   }
@@ -152,6 +174,7 @@ autoUpdater.on('error', (err) => {
 function createMainWindow() {
   if (mainWindow) return;
 
+  log('Creating main window...');
   sendStatusToSplash('loading');
 
   mainWindow = new BrowserWindow({
@@ -173,11 +196,24 @@ function createMainWindow() {
     autoHideMenuBar: true,
   });
 
+  // Log renderer console messages
+  mainWindow.webContents.on('console-message', (event, level, message, line, sourceId) => {
+    const levels = ['verbose', 'info', 'warning', 'error'];
+    log(`[Renderer ${levels[level] || level}] ${message}`);
+  });
+
+  // Log renderer errors
+  mainWindow.webContents.on('did-fail-load', (event, errorCode, errorDescription) => {
+    log(`[Renderer] Failed to load: ${errorCode} - ${errorDescription}`);
+  });
+
   // Show loading status in splash
   sendStatusToSplash('loading');
 
   // Load local frontend
-  mainWindow.loadFile(path.join(__dirname, 'web', 'index.html'));
+  const indexPath = path.join(__dirname, 'web', 'index.html');
+  log(`Loading: ${indexPath}`);
+  mainWindow.loadFile(indexPath);
 
   // Wait until page is fully rendered
   let windowShown = false;
