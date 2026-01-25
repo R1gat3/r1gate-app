@@ -143,4 +143,22 @@ jobs:
           sshpass -p "$DEPLOY_PASS" ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null "$DEPLOY_USER@$DEPLOY_HOST" "cd '$DEPLOY_PATH' && ln -sf \$(ls -t *.exe 2>/dev/null | head -1) R1Gate-Voice-Setup.exe || true"
           sshpass -p "$DEPLOY_PASS" ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null "$DEPLOY_USER@$DEPLOY_HOST" "cd '$DEPLOY_PATH' && ln -sf \$(ls -t *.AppImage 2>/dev/null | head -1) R1Gate-Voice.AppImage || true"
 
+          # Update version.json with new version from tag
+          VERSION="${GITHUB_REF#refs/tags/v}"
+          echo "Updating version.json to version: $VERSION"
+          sshpass -p "$DEPLOY_PASS" ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null "$DEPLOY_USER@$DEPLOY_HOST" "cat > '$DEPLOY_PATH/version.json' << EOF
+{
+  \"version\": \"$VERSION\",
+  \"windows\": {
+    \"url\": \"https://r1gate.ru/download/R1Gate-Voice-Setup.exe\",
+    \"filename\": \"R1Gate-Voice-Setup.exe\"
+  },
+  \"linux\": {
+    \"url\": \"https://r1gate.ru/download/R1Gate-Voice.AppImage\",
+    \"filename\": \"R1Gate-Voice.AppImage\"
+  }
+}
+EOF"
+          echo "version.json updated!"
+
           echo "Deploy completed!"

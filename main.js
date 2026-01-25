@@ -1,7 +1,11 @@
 const { app, BrowserWindow, Tray, Menu, shell, ipcMain, desktopCapturer, session } = require('electron');
-const { autoUpdater } = require('electron-updater');
 const path = require('path');
 const fs = require('fs');
+const https = require('https');
+const { spawn } = require('child_process');
+
+// Version check URL
+const VERSION_URL = 'https://r1gate.ru/download/version.json';
 
 // Logger - writes to app directory
 const logFile = path.join(app.getPath('userData'), 'r1gate-debug.log');
@@ -18,16 +22,15 @@ function log(message) {
 
 log('App starting...');
 log(`Log file: ${logFile}`);
+log(`Current version: ${app.getVersion()}`);
 
 // Single instance lock - prevent duplicate processes
 const gotTheLock = app.requestSingleInstanceLock();
 
 if (!gotTheLock) {
-  // Another instance is running - quit immediately
   app.exit(0);
 }
 
-// Only continue if we got the lock
 let mainWindow;
 let splashWindow;
 let tray;
@@ -42,18 +45,6 @@ app.on('second-instance', () => {
     mainWindow.focus();
   }
 });
-
-// Configure auto-updater
-autoUpdater.autoDownload = true;
-autoUpdater.autoInstallOnAppQuit = true;
-autoUpdater.disableDifferentialDownload = true; // Force full download, not delta
-autoUpdater.logger = {
-  info: (msg) => log(`[AutoUpdater INFO] ${msg}`),
-  warn: (msg) => log(`[AutoUpdater WARN] ${msg}`),
-  error: (msg) => log(`[AutoUpdater ERROR] ${msg}`),
-  debug: (msg) => log(`[AutoUpdater DEBUG] ${msg}`),
-};
-autoUpdater.logger.transports = { file: { level: 'debug' } };
 
 function sendStatusToSplash(status, data = null) {
   if (splashWindow && !splashWindow.isDestroyed()) {
@@ -80,123 +71,197 @@ function createSplashWindow() {
   splashWindow.loadFile(path.join(__dirname, 'splash.html'));
   splashWindow.center();
 
-  // Send current version to splash
   splashWindow.webContents.on('did-finish-load', () => {
     sendStatusToSplash('version', app.getVersion());
     checkForUpdates();
   });
 }
 
-async function checkInternetConnection() {
-  log('Checking internet connection...');
-  const dns = require('dns').promises;
-  try {
-    const result = await dns.lookup('web.r1gate.ru');
-    log(`DNS lookup web.r1gate.ru: ${JSON.stringify(result)}`);
-    return true;
-  } catch (err) {
-    log(`DNS lookup web.r1gate.ru failed: ${err.message}`);
-    // Fallback: try google
-    try {
-      await dns.lookup('google.com');
-      log('Fallback DNS lookup google.com: success');
-      return true;
-    } catch (err2) {
-      log(`Fallback DNS lookup google.com failed: ${err2.message}`);
-      return false;
-    }
+// Simple HTTP GET with redirect support
+function httpGet(url) {
+  return new Promise((resolve, reject) => {
+    const makeRequest = (requestUrl) => {
+      const protocol = requestUrl.startsWith('https') ? https : require('http');
+      protocol.get(requestUrl, (res) => {
+        // Handle redirects
+        if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
+          log(`Redirect to: ${res.headers.location}`);
+          makeRequest(res.headers.location);
+          return;
+        }
+
+        if (res.statusCode !== 200) {
+          reject(new Error(`HTTP ${res.statusCode}`));
+          return;
+        }
+
+        let data = '';
+        res.on('data', chunk => data += chunk);
+        res.on('end', () => resolve(data));
+        res.on('error', reject);
+      }).on('error', reject);
+    };
+    makeRequest(url);
+  });
+}
+
+// Download file with progress
+function downloadFile(url, destPath, onProgress) {
+  return new Promise((resolve, reject) => {
+    const makeRequest = (requestUrl) => {
+      const protocol = requestUrl.startsWith('https') ? https : require('http');
+      protocol.get(requestUrl, (res) => {
+        // Handle redirects
+        if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
+          log(`Download redirect to: ${res.headers.location}`);
+          makeRequest(res.headers.location);
+          return;
+        }
+
+        if (res.statusCode !== 200) {
+          reject(new Error(`HTTP ${res.statusCode}`));
+          return;
+        }
+
+        const totalSize = parseInt(res.headers['content-length'], 10) || 0;
+        let downloadedSize = 0;
+
+        const file = fs.createWriteStream(destPath);
+
+        res.on('data', (chunk) => {
+          downloadedSize += chunk.length;
+          if (totalSize > 0 && onProgress) {
+            onProgress(downloadedSize, totalSize);
+          }
+        });
+
+        res.pipe(file);
+
+        file.on('finish', () => {
+          file.close();
+          resolve(destPath);
+        });
+
+        file.on('error', (err) => {
+          fs.unlink(destPath, () => {});
+          reject(err);
+        });
+
+        res.on('error', (err) => {
+          fs.unlink(destPath, () => {});
+          reject(err);
+        });
+      }).on('error', reject);
+    };
+    makeRequest(url);
+  });
+}
+
+// Compare versions: returns true if serverVersion > currentVersion
+function isNewerVersion(serverVersion, currentVersion) {
+  const server = serverVersion.split('.').map(Number);
+  const current = currentVersion.split('.').map(Number);
+
+  for (let i = 0; i < Math.max(server.length, current.length); i++) {
+    const s = server[i] || 0;
+    const c = current[i] || 0;
+    if (s > c) return true;
+    if (s < c) return false;
   }
+  return false;
 }
 
 async function checkForUpdates() {
-  log(`Current app version: ${app.getVersion()}`);
-  log(`App is packaged: ${app.isPackaged}`);
-
-  // Check internet connection first
-  sendStatusToSplash('checking-connection');
-  const hasInternet = await checkInternetConnection();
-
-  if (!hasInternet) {
-    log('No internet connection detected');
-    sendStatusToSplash('no-internet');
-    return; // Don't proceed without internet
-  }
+  const currentVersion = app.getVersion();
+  log(`Checking for updates... Current: ${currentVersion}`);
 
   // In development, skip update check
   if (!app.isPackaged) {
     log('Development mode - skipping update check');
     sendStatusToSplash('not-available');
-    setTimeout(() => {
-      createMainWindow();
-    }, 1000);
+    setTimeout(() => createMainWindow(), 500);
     return;
   }
 
-  // Check for updates
-  log('Starting update check from GitHub...');
   sendStatusToSplash('checking');
 
   try {
-    const result = await autoUpdater.checkForUpdates();
-    log(`Update check result: ${JSON.stringify(result?.updateInfo?.version || 'no info')}`);
+    // Fetch version.json from server
+    log(`Fetching ${VERSION_URL}`);
+    const versionData = await httpGet(VERSION_URL);
+    const versionInfo = JSON.parse(versionData);
+    log(`Server version: ${versionInfo.version}`);
+
+    if (isNewerVersion(versionInfo.version, currentVersion)) {
+      log(`Update available: ${versionInfo.version}`);
+      sendStatusToSplash('available', { version: versionInfo.version });
+
+      // Determine platform
+      const isWindows = process.platform === 'win32';
+      const platformInfo = isWindows ? versionInfo.windows : versionInfo.linux;
+
+      if (!platformInfo) {
+        log(`No update available for platform: ${process.platform}`);
+        sendStatusToSplash('not-available');
+        setTimeout(() => createMainWindow(), 500);
+        return;
+      }
+
+      // Download update
+      const downloadDir = app.getPath('temp');
+      const downloadPath = path.join(downloadDir, platformInfo.filename);
+
+      log(`Downloading: ${platformInfo.url} -> ${downloadPath}`);
+      sendStatusToSplash('downloading', { percent: 0 });
+
+      await downloadFile(platformInfo.url, downloadPath, (downloaded, total) => {
+        const percent = Math.round((downloaded / total) * 100);
+        sendStatusToSplash('downloading', {
+          percent,
+          transferred: downloaded,
+          total
+        });
+      });
+
+      log(`Download complete: ${downloadPath}`);
+      sendStatusToSplash('downloaded');
+
+      // Run installer
+      setTimeout(() => {
+        log('Launching installer and quitting...');
+
+        if (isWindows) {
+          // Run NSIS installer
+          spawn(downloadPath, ['/S'], {
+            detached: true,
+            stdio: 'ignore'
+          }).unref();
+        } else {
+          // Make AppImage executable and run
+          fs.chmodSync(downloadPath, '755');
+          spawn(downloadPath, [], {
+            detached: true,
+            stdio: 'ignore'
+          }).unref();
+        }
+
+        app.quit();
+      }, 1500);
+
+    } else {
+      log('No update needed - already on latest version');
+      sendStatusToSplash('not-available');
+      setTimeout(() => createMainWindow(), 500);
+    }
+
   } catch (err) {
     log(`Update check failed: ${err.message}`);
-    log(`Error details: ${err.stack}`);
+    log(`Stack: ${err.stack}`);
     sendStatusToSplash('error');
-    setTimeout(() => {
-      createMainWindow();
-    }, 2000);
+    // Continue to main window even on error
+    setTimeout(() => createMainWindow(), 2000);
   }
 }
-
-// Auto-updater events
-autoUpdater.on('checking-for-update', () => {
-  log('Checking for update...');
-  sendStatusToSplash('checking');
-});
-
-autoUpdater.on('update-available', (info) => {
-  log(`Update available: ${info.version} (current: ${app.getVersion()})`);
-  sendStatusToSplash('available', { version: info.version });
-});
-
-autoUpdater.on('update-not-available', (info) => {
-  log(`No update available. Current version: ${app.getVersion()}, Latest: ${info?.version || 'unknown'}`);
-  sendStatusToSplash('not-available');
-  setTimeout(() => {
-    createMainWindow();
-  }, 500);
-});
-
-autoUpdater.on('download-progress', (progress) => {
-  const percent = Math.round(progress.percent);
-  log(`Download progress: ${percent}% (${Math.round(progress.transferred / 1024)}KB / ${Math.round(progress.total / 1024)}KB)`);
-  sendStatusToSplash('downloading', {
-    percent: progress.percent,
-    bytesPerSecond: progress.bytesPerSecond,
-    transferred: progress.transferred,
-    total: progress.total,
-  });
-});
-
-autoUpdater.on('update-downloaded', (info) => {
-  log(`Update downloaded: ${info.version}. Installing...`);
-  sendStatusToSplash('downloaded');
-  setTimeout(() => {
-    // Force quit all windows and install
-    app.isQuitting = true;
-    autoUpdater.quitAndInstall(true, true); // silent install, run after
-  }, 1500);
-});
-
-autoUpdater.on('error', (err) => {
-  log(`Auto-updater error: ${err.message}`);
-  log(`Error stack: ${err.stack}`);
-  sendStatusToSplash('error');
-  setTimeout(() => {
-    createMainWindow();
-  }, 2000);
-});
 
 function createMainWindow() {
   if (mainWindow) return;
@@ -217,32 +282,27 @@ function createMainWindow() {
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
-      webSecurity: false, // Allow cross-origin requests from file://
+      webSecurity: false,
       preload: path.join(__dirname, 'preload.js'),
     },
     autoHideMenuBar: true,
   });
 
-  // Log renderer console messages
   mainWindow.webContents.on('console-message', (event, level, message, line, sourceId) => {
     const levels = ['verbose', 'info', 'warning', 'error'];
     log(`[Renderer ${levels[level] || level}] ${message}`);
   });
 
-  // Log renderer errors
   mainWindow.webContents.on('did-fail-load', (event, errorCode, errorDescription) => {
     log(`[Renderer] Failed to load: ${errorCode} - ${errorDescription}`);
   });
 
-  // Show loading status in splash
   sendStatusToSplash('loading');
 
-  // Load local frontend
   const indexPath = path.join(__dirname, 'web', 'index.html');
   log(`Loading: ${indexPath}`);
   mainWindow.loadFile(indexPath);
 
-  // Wait until page is fully rendered
   let windowShown = false;
 
   const showMainWindow = () => {
@@ -257,8 +317,6 @@ function createMainWindow() {
   };
 
   mainWindow.once('ready-to-show', showMainWindow);
-
-  // Fallback timeout in case ready-to-show doesn't fire
   setTimeout(showMainWindow, 15000);
 
   mainWindow.webContents.setWindowOpenHandler(({ url }) => {
@@ -309,7 +367,7 @@ function createTray() {
       label: 'Check for Updates',
       click: () => {
         if (app.isPackaged) {
-          autoUpdater.checkForUpdates();
+          checkForUpdates();
         }
       }
     },
