@@ -16,7 +16,7 @@ Desktop application for [R1Gate](https://r1gate.ru) — a voice communication pl
 
 ## Download
 
-Download the latest release from the [Releases](https://github.com/r1gate/r1gate-app/releases) page.
+Download the latest release from the [Releases](https://github.com/R1gat3/r1gate-app/releases) page.
 
 ### Available builds:
 - **Windows:** `.exe` installer
@@ -34,7 +34,7 @@ Download the latest release from the [Releases](https://github.com/r1gate/r1gate
 
 ```bash
 # Clone the repository
-git clone https://github.com/r1gate/r1gate-app.git
+git clone https://github.com/R1gat3/r1gate-app.git
 cd r1gate-app
 
 # Install dependencies
@@ -96,4 +96,4 @@ This project is licensed under the MIT License — see the [LICENSE](LICENSE) fi
 
 - [R1Gate Web](https://web.r1gate.ru)
 - [R1Gate Website](https://r1gate.ru)
-- [Report Issues](https://github.com/r1gate/r1gate-app/issues)
+- [Report Issues](https://github.com/R1gat3/r1gate-app/issues)

@@ -6,10 +6,10 @@
   "homepage": "https://r1gate.ru",
   "repository": {
     "type": "git",
-    "url": "https://github.com/r1gate/r1gate-app.git"
+    "url": "https://github.com/R1gat3/r1gate-app.git"
   },
   "bugs": {
-    "url": "https://github.com/r1gate/r1gate-app/issues"
+    "url": "https://github.com/R1gat3/r1gate-app/issues"
   },
   "keywords": [
     "voice",
@@ -86,7 +86,7 @@
     },
     "publish": {
       "provider": "github",
-      "owner": "r1gate",
+      "owner": "R1gat3",
       "repo": "r1gate-app"
     }
   }
