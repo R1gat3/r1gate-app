@@ -97,3 +97,47 @@ jobs:
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  deploy:
+    needs: [build-windows, build-linux]
+    if: always() && startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+        continue-on-error: true
+
+      - name: Setup SSH
+        env:
+          DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
+        run: |
+          mkdir -p ~/.ssh
+          echo "$DEPLOY_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H ${{ secrets.DEPLOY_HOST }} >> ~/.ssh/known_hosts 2>/dev/null || true
+
+      - name: Deploy to server
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+        run: |
+          # Create directory if not exists
+          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no ${DEPLOY_USER}@${DEPLOY_HOST} "mkdir -p ${DEPLOY_PATH}"
+
+          # Upload Windows files
+          scp -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no artifacts/r1gate-win/*.exe ${DEPLOY_USER}@${DEPLOY_HOST}:${DEPLOY_PATH}/ || true
+          scp -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no artifacts/r1gate-win/*.yml ${DEPLOY_USER}@${DEPLOY_HOST}:${DEPLOY_PATH}/ || true
+
+          # Upload Linux files
+          scp -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no artifacts/r1gate-linux/*.AppImage ${DEPLOY_USER}@${DEPLOY_HOST}:${DEPLOY_PATH}/ || true
+          scp -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no artifacts/r1gate-linux/*.deb ${DEPLOY_USER}@${DEPLOY_HOST}:${DEPLOY_PATH}/ || true
+
+          # Create/update symlinks for latest version
+          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no ${DEPLOY_USER}@${DEPLOY_HOST} "cd ${DEPLOY_PATH} && ln -sf \$(ls -t *.exe 2>/dev/null | head -1) R1Gate-Voice-Setup.exe || true"
+          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no ${DEPLOY_USER}@${DEPLOY_HOST} "cd ${DEPLOY_PATH} && ln -sf \$(ls -t *.AppImage 2>/dev/null | head -1) R1Gate-Voice.AppImage || true"
+
+          echo "Deploy completed!"
