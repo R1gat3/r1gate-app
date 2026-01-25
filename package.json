@@ -1,6 +1,6 @@
 {
   "name": "r1gate-app",
-  "version": "1.0.0",
+  "version": "1.0.5",
   "description": "R1Gate Voice - Desktop Application for voice communication",
   "main": "main.js",
   "homepage": "https://r1gate.ru",
@@ -32,6 +32,9 @@
     "url": "https://r1gate.ru"
   },
   "license": "MIT",
+  "dependencies": {
+    "electron-updater": "^6.1.7"
+  },
   "devDependencies": {
     "electron": "^28.0.0",
     "electron-builder": "^24.9.1"
@@ -46,6 +49,7 @@
     "files": [
       "main.js",
       "preload.js",
+      "splashPreload.js",
       "splash.html",
       "icon.png",
       "icon.svg"
@@ -84,6 +88,11 @@
       "icon": "icon.png",
       "category": "Network",
       "artifactName": "R1Gate-Voice-${version}.${ext}"
+    },
+    "publish": {
+      "provider": "github",
+      "owner": "R1gat3",
+      "repo": "r1gate-app"
     }
   }
 }

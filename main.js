@@ -1,4 +1,5 @@
 const { app, BrowserWindow, Tray, Menu, shell, ipcMain, desktopCapturer, session } = require('electron');
+const { autoUpdater } = require('electron-updater');
 const path = require('path');
 
 let mainWindow;
@@ -9,12 +10,9 @@ let tray;
 const gotTheLock = app.requestSingleInstanceLock();
 
 if (!gotTheLock) {
-  // Another instance is already running, quit this one
   app.quit();
 } else {
-  // This is the first instance
   app.on('second-instance', () => {
-    // Someone tried to run a second instance, focus our window instead
     if (mainWindow) {
       if (mainWindow.isMinimized()) {
         mainWindow.restore();
@@ -25,10 +23,20 @@ if (!gotTheLock) {
   });
 }
 
+// Configure auto-updater
+autoUpdater.autoDownload = true;
+autoUpdater.autoInstallOnAppQuit = true;
+
+function sendStatusToSplash(status, data = null) {
+  if (splashWindow && !splashWindow.isDestroyed()) {
+    splashWindow.webContents.send('update-status', status, data);
+  }
+}
+
 function createSplashWindow() {
   splashWindow = new BrowserWindow({
-    width: 400,
-    height: 300,
+    width: 300,
+    height: 350,
     frame: false,
     transparent: true,
     alwaysOnTop: true,
@@ -37,14 +45,83 @@ function createSplashWindow() {
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
+      preload: path.join(__dirname, 'splashPreload.js'),
     },
   });
 
   splashWindow.loadFile(path.join(__dirname, 'splash.html'));
   splashWindow.center();
+
+  // Send current version to splash
+  splashWindow.webContents.on('did-finish-load', () => {
+    sendStatusToSplash('version', app.getVersion());
+    checkForUpdates();
+  });
 }
 
-function createWindow() {
+function checkForUpdates() {
+  // In development, skip update check
+  if (!app.isPackaged) {
+    sendStatusToSplash('not-available');
+    setTimeout(() => {
+      createMainWindow();
+    }, 1000);
+    return;
+  }
+
+  sendStatusToSplash('checking');
+  autoUpdater.checkForUpdates().catch((err) => {
+    console.error('Update check failed:', err);
+    sendStatusToSplash('error');
+    createMainWindow();
+  });
+}
+
+// Auto-updater events
+autoUpdater.on('checking-for-update', () => {
+  sendStatusToSplash('checking');
+});
+
+autoUpdater.on('update-available', (info) => {
+  sendStatusToSplash('available', { version: info.version });
+});
+
+autoUpdater.on('update-not-available', () => {
+  sendStatusToSplash('not-available');
+  setTimeout(() => {
+    createMainWindow();
+  }, 500);
+});
+
+autoUpdater.on('download-progress', (progress) => {
+  sendStatusToSplash('downloading', {
+    percent: progress.percent,
+    bytesPerSecond: progress.bytesPerSecond,
+    transferred: progress.transferred,
+    total: progress.total,
+  });
+});
+
+autoUpdater.on('update-downloaded', () => {
+  sendStatusToSplash('downloaded');
+  setTimeout(() => {
+    autoUpdater.quitAndInstall(false, true);
+  }, 1500);
+});
+
+autoUpdater.on('error', (err) => {
+  console.error('Auto-updater error:', err);
+  sendStatusToSplash('error');
+  setTimeout(() => {
+    createMainWindow();
+  }, 500);
+});
+
+function createMainWindow() {
+  if (mainWindow) return;
+
+  sendStatusToSplash('loading');
+
   mainWindow = new BrowserWindow({
     width: 1280,
     height: 800,
@@ -62,10 +139,8 @@ function createWindow() {
     autoHideMenuBar: true,
   });
 
-  // Load the web version
   mainWindow.loadURL('https://web.r1gate.ru');
 
-  // When page finishes loading, close splash and show main window
   mainWindow.webContents.on('did-finish-load', () => {
     if (splashWindow && !splashWindow.isDestroyed()) {
       splashWindow.close();
@@ -74,13 +149,10 @@ function createWindow() {
     mainWindow.show();
   });
 
-  // Open external links in browser
   mainWindow.webContents.setWindowOpenHandler(({ url }) => {
-    // Allow navigation within web.r1gate.ru
     if (url.includes('web.r1gate.ru')) {
       return { action: 'allow' };
     }
-    // Open external links in browser
     if (url.startsWith('http')) {
       shell.openExternal(url);
       return { action: 'deny' };
@@ -88,7 +160,6 @@ function createWindow() {
     return { action: 'allow' };
   });
 
-  // Minimize to tray on close
   mainWindow.on('close', (event) => {
     if (!app.isQuitting) {
       event.preventDefault();
@@ -100,7 +171,6 @@ function createWindow() {
     mainWindow = null;
   });
 
-  // Send maximize/unmaximize events to renderer
   mainWindow.on('maximize', () => {
     mainWindow.webContents.send('window-maximized', true);
   });
@@ -124,6 +194,15 @@ function createTray() {
     },
     { type: 'separator' },
     {
+      label: 'Check for Updates',
+      click: () => {
+        if (app.isPackaged) {
+          autoUpdater.checkForUpdates();
+        }
+      }
+    },
+    { type: 'separator' },
+    {
       label: 'Exit',
       click: () => {
         app.isQuitting = true;
@@ -142,7 +221,7 @@ function createTray() {
   });
 }
 
-// Handler for getting screen sources
+// IPC handlers
 ipcMain.handle('get-sources', async () => {
   const sources = await desktopCapturer.getSources({
     types: ['window', 'screen'],
@@ -155,7 +234,6 @@ ipcMain.handle('get-sources', async () => {
   }));
 });
 
-// Window control IPC handlers
 ipcMain.on('window-minimize', () => {
   if (mainWindow) {
     mainWindow.minimize();
@@ -187,7 +265,6 @@ ipcMain.handle('window-is-maximized', () => {
 
 // Start the application
 app.whenReady().then(() => {
-  // Allow screen capture for web content
   session.defaultSession.setDisplayMediaRequestHandler((request, callback) => {
     desktopCapturer.getSources({ types: ['screen', 'window'] }).then((sources) => {
       if (sources.length > 0) {
@@ -199,27 +276,23 @@ app.whenReady().then(() => {
   });
 
   createSplashWindow();
-  createWindow();
   createTray();
 });
 
-// macOS: recreate window when clicking on dock icon
 app.on('activate', () => {
   if (BrowserWindow.getAllWindows().length === 0) {
-    createWindow();
+    createSplashWindow();
   } else if (mainWindow) {
     mainWindow.show();
   }
 });
 
-// Quit when all windows are closed (except macOS)
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     app.quit();
   }
 });
 
-// Allow access to microphone, camera and screen
 app.on('web-contents-created', (event, contents) => {
   contents.session.setPermissionRequestHandler((webContents, permission, callback) => {
     const allowedPermissions = ['media', 'mediaKeySystem', 'notifications', 'display-capture'];
