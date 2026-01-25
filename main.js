@@ -66,7 +66,7 @@ function createSplashWindow() {
 async function checkInternetConnection() {
   try {
     const { net } = require('electron');
-    const request = net.request('https://r1gate.ru');
+    const request = net.request('https://web.r1gate.ru');
     return new Promise((resolve) => {
       request.on('response', () => resolve(true));
       request.on('error', () => resolve(false));
