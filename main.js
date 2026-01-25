@@ -64,18 +64,17 @@ function createSplashWindow() {
 }
 
 async function checkInternetConnection() {
-  try {
-    const { net } = require('electron');
-    const request = net.request('https://web.r1gate.ru');
-    return new Promise((resolve) => {
-      request.on('response', () => resolve(true));
-      request.on('error', () => resolve(false));
-      setTimeout(() => resolve(false), 5000);
-      request.end();
+  const https = require('https');
+  return new Promise((resolve) => {
+    const req = https.get('https://web.r1gate.ru', { timeout: 10000 }, (res) => {
+      resolve(res.statusCode === 200 || res.statusCode === 301 || res.statusCode === 302);
     });
-  } catch {
-    return false;
-  }
+    req.on('error', () => resolve(false));
+    req.on('timeout', () => {
+      req.destroy();
+      resolve(false);
+    });
+  });
 }
 
 async function checkForUpdates() {
@@ -97,6 +96,7 @@ async function checkForUpdates() {
     return;
   }
 
+  // Check for updates
   sendStatusToSplash('checking');
   autoUpdater.checkForUpdates().catch((err) => {
     console.error('Update check failed:', err);
