@@ -146,7 +146,7 @@ jobs:
           # Update version.json with new version from tag
           VERSION="${GITHUB_REF#refs/tags/v}"
           echo "Updating version.json to version: $VERSION"
-          sshpass -p "$DEPLOY_PASS" ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null "$DEPLOY_USER@$DEPLOY_HOST" "echo '{\"version\":\"'$VERSION'\",\"windows\":{\"url\":\"https://r1gate.ru/download/R1Gate-Voice-Setup.exe\",\"filename\":\"R1Gate-Voice-Setup.exe\"},\"linux\":{\"url\":\"https://r1gate.ru/download/R1Gate-Voice.AppImage\",\"filename\":\"R1Gate-Voice.AppImage\"}}' > '$DEPLOY_PATH/version.json'"
+          sshpass -p "$DEPLOY_PASS" ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null "$DEPLOY_USER@$DEPLOY_HOST" "echo '{\"version\":\"'$VERSION'\",\"windows\":{\"url\":\"https://r1gate.ru/downloads/R1Gate-Voice-Setup.exe\",\"filename\":\"R1Gate-Voice-Setup.exe\"},\"linux\":{\"url\":\"https://r1gate.ru/downloads/R1Gate-Voice.AppImage\",\"filename\":\"R1Gate-Voice.AppImage\"}}' > '$DEPLOY_PATH/version.json'"
           echo "version.json updated!"
 
           echo "Deploy completed!"

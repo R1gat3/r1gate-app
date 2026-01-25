@@ -5,7 +5,7 @@ const https = require('https');
 const { spawn } = require('child_process');
 
 // Version check URL
-const VERSION_URL = 'https://r1gate.ru/download/version.json';
+const VERSION_URL = 'https://r1gate.ru/downloads/version.json';
 
 // Logger - writes to app directory
 const logFile = path.join(app.getPath('userData'), 'r1gate-debug.log');
