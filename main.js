@@ -167,6 +167,7 @@ function createMainWindow() {
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
+      webSecurity: false, // Allow cross-origin requests from file://
       preload: path.join(__dirname, 'preload.js'),
     },
     autoHideMenuBar: true,
