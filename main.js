@@ -29,6 +29,7 @@ app.on('second-instance', () => {
 // Configure auto-updater
 autoUpdater.autoDownload = true;
 autoUpdater.autoInstallOnAppQuit = true;
+autoUpdater.disableDifferentialDownload = true; // Force full download, not delta
 
 function sendStatusToSplash(status, data = null) {
   if (splashWindow && !splashWindow.isDestroyed()) {
@@ -132,7 +133,9 @@ autoUpdater.on('download-progress', (progress) => {
 autoUpdater.on('update-downloaded', () => {
   sendStatusToSplash('downloaded');
   setTimeout(() => {
-    autoUpdater.quitAndInstall(false, true);
+    // Force quit all windows and install
+    app.isQuitting = true;
+    autoUpdater.quitAndInstall(true, true); // silent install, run after
   }, 1500);
 });
 
