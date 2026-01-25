@@ -291,7 +291,7 @@ function createMainWindow() {
     icon: path.join(__dirname, 'icon.png'),
     frame: false,
     show: false,
-    backgroundColor: '#0f0f23',
+    backgroundColor: '#141819',
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
