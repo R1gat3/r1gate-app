@@ -47,6 +47,13 @@ app.on('second-instance', () => {
 autoUpdater.autoDownload = true;
 autoUpdater.autoInstallOnAppQuit = true;
 autoUpdater.disableDifferentialDownload = true; // Force full download, not delta
+autoUpdater.logger = {
+  info: (msg) => log(`[AutoUpdater INFO] ${msg}`),
+  warn: (msg) => log(`[AutoUpdater WARN] ${msg}`),
+  error: (msg) => log(`[AutoUpdater ERROR] ${msg}`),
+  debug: (msg) => log(`[AutoUpdater DEBUG] ${msg}`),
+};
+autoUpdater.logger.transports = { file: { level: 'debug' } };
 
 function sendStatusToSplash(status, data = null) {
   if (splashWindow && !splashWindow.isDestroyed()) {
@@ -102,17 +109,22 @@ async function checkInternetConnection() {
 }
 
 async function checkForUpdates() {
+  log(`Current app version: ${app.getVersion()}`);
+  log(`App is packaged: ${app.isPackaged}`);
+
   // Check internet connection first
   sendStatusToSplash('checking-connection');
   const hasInternet = await checkInternetConnection();
 
   if (!hasInternet) {
+    log('No internet connection detected');
     sendStatusToSplash('no-internet');
     return; // Don't proceed without internet
   }
 
   // In development, skip update check
   if (!app.isPackaged) {
+    log('Development mode - skipping update check');
     sendStatusToSplash('not-available');
     setTimeout(() => {
       createMainWindow();
@@ -121,24 +133,35 @@ async function checkForUpdates() {
   }
 
   // Check for updates
+  log('Starting update check from GitHub...');
   sendStatusToSplash('checking');
-  autoUpdater.checkForUpdates().catch((err) => {
-    console.error('Update check failed:', err);
+
+  try {
+    const result = await autoUpdater.checkForUpdates();
+    log(`Update check result: ${JSON.stringify(result?.updateInfo?.version || 'no info')}`);
+  } catch (err) {
+    log(`Update check failed: ${err.message}`);
+    log(`Error details: ${err.stack}`);
     sendStatusToSplash('error');
-    createMainWindow();
-  });
+    setTimeout(() => {
+      createMainWindow();
+    }, 2000);
+  }
 }
 
 // Auto-updater events
 autoUpdater.on('checking-for-update', () => {
+  log('Checking for update...');
   sendStatusToSplash('checking');
 });
 
 autoUpdater.on('update-available', (info) => {
+  log(`Update available: ${info.version} (current: ${app.getVersion()})`);
   sendStatusToSplash('available', { version: info.version });
 });
 
-autoUpdater.on('update-not-available', () => {
+autoUpdater.on('update-not-available', (info) => {
+  log(`No update available. Current version: ${app.getVersion()}, Latest: ${info?.version || 'unknown'}`);
   sendStatusToSplash('not-available');
   setTimeout(() => {
     createMainWindow();
@@ -146,6 +169,8 @@ autoUpdater.on('update-not-available', () => {
 });
 
 autoUpdater.on('download-progress', (progress) => {
+  const percent = Math.round(progress.percent);
+  log(`Download progress: ${percent}% (${Math.round(progress.transferred / 1024)}KB / ${Math.round(progress.total / 1024)}KB)`);
   sendStatusToSplash('downloading', {
     percent: progress.percent,
     bytesPerSecond: progress.bytesPerSecond,
@@ -154,7 +179,8 @@ autoUpdater.on('download-progress', (progress) => {
   });
 });
 
-autoUpdater.on('update-downloaded', () => {
+autoUpdater.on('update-downloaded', (info) => {
+  log(`Update downloaded: ${info.version}. Installing...`);
   sendStatusToSplash('downloaded');
   setTimeout(() => {
     // Force quit all windows and install
@@ -164,11 +190,12 @@ autoUpdater.on('update-downloaded', () => {
 });
 
 autoUpdater.on('error', (err) => {
-  console.error('Auto-updater error:', err);
+  log(`Auto-updater error: ${err.message}`);
+  log(`Error stack: ${err.stack}`);
   sendStatusToSplash('error');
   setTimeout(() => {
     createMainWindow();
-  }, 500);
+  }, 2000);
 });
 
 function createMainWindow() {
