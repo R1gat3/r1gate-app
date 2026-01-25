@@ -1,6 +1,6 @@
 {
   "name": "r1gate-app",
-  "version": "1.0.28",
+  "version": "1.0.29",
   "description": "R1Gate Voice - Desktop Application for voice communication",
   "main": "main.js",
   "homepage": "https://r1gate.ru",
