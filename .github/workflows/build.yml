@@ -113,6 +113,9 @@ jobs:
       - name: Install sshpass
         run: sudo apt-get install -y sshpass
 
+      - name: List artifact structure
+        run: find artifacts -type f 2>/dev/null || echo "No artifacts"
+
       - name: Deploy to server
         env:
           DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
@@ -123,13 +126,29 @@ jobs:
           # Create directory if not exists
           sshpass -p "$DEPLOY_PASS" ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${DEPLOY_USER}@${DEPLOY_HOST} "mkdir -p ${DEPLOY_PATH}"
 
-          # Upload Windows files
-          sshpass -p "$DEPLOY_PASS" scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null artifacts/r1gate-win/*.exe ${DEPLOY_USER}@${DEPLOY_HOST}:${DEPLOY_PATH}/ || true
-          sshpass -p "$DEPLOY_PASS" scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null artifacts/r1gate-win/*.yml ${DEPLOY_USER}@${DEPLOY_HOST}:${DEPLOY_PATH}/ || true
+          # Upload all exe files
+          find artifacts -name "*.exe" -type f | while read f; do
+            echo "Uploading: $f"
+            sshpass -p "$DEPLOY_PASS" scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null "$f" ${DEPLOY_USER}@${DEPLOY_HOST}:${DEPLOY_PATH}/
+          done
 
-          # Upload Linux files
-          sshpass -p "$DEPLOY_PASS" scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null artifacts/r1gate-linux/*.AppImage ${DEPLOY_USER}@${DEPLOY_HOST}:${DEPLOY_PATH}/ || true
-          sshpass -p "$DEPLOY_PASS" scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null artifacts/r1gate-linux/*.deb ${DEPLOY_USER}@${DEPLOY_HOST}:${DEPLOY_PATH}/ || true
+          # Upload all yml files
+          find artifacts -name "*.yml" -type f | while read f; do
+            echo "Uploading: $f"
+            sshpass -p "$DEPLOY_PASS" scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null "$f" ${DEPLOY_USER}@${DEPLOY_HOST}:${DEPLOY_PATH}/
+          done
+
+          # Upload all AppImage files
+          find artifacts -name "*.AppImage" -type f | while read f; do
+            echo "Uploading: $f"
+            sshpass -p "$DEPLOY_PASS" scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null "$f" ${DEPLOY_USER}@${DEPLOY_HOST}:${DEPLOY_PATH}/
+          done
+
+          # Upload all deb files
+          find artifacts -name "*.deb" -type f | while read f; do
+            echo "Uploading: $f"
+            sshpass -p "$DEPLOY_PASS" scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null "$f" ${DEPLOY_USER}@${DEPLOY_HOST}:${DEPLOY_PATH}/
+          done
 
           # Create/update symlinks for latest version
           sshpass -p "$DEPLOY_PASS" ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${DEPLOY_USER}@${DEPLOY_HOST} "cd ${DEPLOY_PATH} && ln -sf \$(ls -t *.exe 2>/dev/null | head -1) R1Gate-Voice-Setup.exe || true"
