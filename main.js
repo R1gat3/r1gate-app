@@ -2,26 +2,29 @@ const { app, BrowserWindow, Tray, Menu, shell, ipcMain, desktopCapturer, session
 const { autoUpdater } = require('electron-updater');
 const path = require('path');
 
-let mainWindow;
-let splashWindow;
-let tray;
-
 // Single instance lock - prevent duplicate processes
 const gotTheLock = app.requestSingleInstanceLock();
 
 if (!gotTheLock) {
-  app.quit();
-} else {
-  app.on('second-instance', () => {
-    if (mainWindow) {
-      if (mainWindow.isMinimized()) {
-        mainWindow.restore();
-      }
-      mainWindow.show();
-      mainWindow.focus();
-    }
-  });
+  // Another instance is running - quit immediately
+  app.exit(0);
 }
+
+// Only continue if we got the lock
+let mainWindow;
+let splashWindow;
+let tray;
+
+// Handle second instance launch
+app.on('second-instance', () => {
+  if (mainWindow) {
+    if (mainWindow.isMinimized()) {
+      mainWindow.restore();
+    }
+    mainWindow.show();
+    mainWindow.focus();
+  }
+});
 
 // Configure auto-updater
 autoUpdater.autoDownload = true;
