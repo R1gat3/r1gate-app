@@ -134,6 +134,7 @@ function createMainWindow() {
     icon: path.join(__dirname, 'icon.png'),
     frame: false,
     show: false,
+    backgroundColor: '#0f0f23',
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
@@ -142,15 +143,29 @@ function createMainWindow() {
     autoHideMenuBar: true,
   });
 
+  // Show loading status in splash
+  sendStatusToSplash('loading');
+
   mainWindow.loadURL('https://web.r1gate.ru');
 
-  mainWindow.webContents.on('did-finish-load', () => {
+  // Wait until page is fully rendered
+  let windowShown = false;
+
+  const showMainWindow = () => {
+    if (windowShown) return;
+    windowShown = true;
+
     if (splashWindow && !splashWindow.isDestroyed()) {
       splashWindow.close();
       splashWindow = null;
     }
     mainWindow.show();
-  });
+  };
+
+  mainWindow.once('ready-to-show', showMainWindow);
+
+  // Fallback timeout in case ready-to-show doesn't fire
+  setTimeout(showMainWindow, 15000);
 
   mainWindow.webContents.setWindowOpenHandler(({ url }) => {
     if (url.includes('web.r1gate.ru')) {
