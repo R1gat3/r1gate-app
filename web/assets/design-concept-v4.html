@@ -1,0 +1,1067 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>R1Gate - Design Concept v4</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-main: #0c0c0c;
+            --bg-surface: #161616;
+            --bg-elevated: #1f1f1f;
+            --bg-hover: #2a2a2a;
+
+            --text-primary: #ffffff;
+            --text-secondary: #888888;
+            --text-muted: #555555;
+
+            --accent-primary: #ff6b2c;
+            --accent-secondary: #ff8f5a;
+            --accent-glow: rgba(255, 107, 44, 0.3);
+
+            --success: #2ecc71;
+            --danger: #e74c3c;
+            --warning: #f39c12;
+
+            --border: rgba(255, 255, 255, 0.08);
+            --border-active: rgba(255, 107, 44, 0.5);
+
+            --radius-sm: 6px;
+            --radius-md: 10px;
+            --radius-lg: 16px;
+            --radius-xl: 24px;
+        }
+
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background: var(--bg-main);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Main Layout - Horizontal Split */
+        .app-container {
+            display: flex;
+            height: 100vh;
+        }
+
+        /* Left Panel - Compact Navigation */
+        .nav-panel {
+            width: 280px;
+            background: var(--bg-surface);
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid var(--border);
+        }
+
+        /* Logo Area */
+        .logo-area {
+            padding: 24px 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 18px;
+        }
+
+        .logo-text {
+            font-size: 20px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .logo-text span {
+            color: var(--accent-primary);
+        }
+
+        /* Server Switcher - Horizontal Pills */
+        .server-switcher {
+            padding: 16px 12px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .server-pills {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding-bottom: 4px;
+        }
+
+        .server-pills::-webkit-scrollbar {
+            height: 4px;
+        }
+
+        .server-pills::-webkit-scrollbar-thumb {
+            background: var(--bg-hover);
+            border-radius: 2px;
+        }
+
+        .server-pill {
+            flex-shrink: 0;
+            padding: 8px 16px;
+            background: var(--bg-elevated);
+            border-radius: var(--radius-xl);
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+        }
+
+        .server-pill:hover {
+            background: var(--bg-hover);
+            color: var(--text-primary);
+        }
+
+        .server-pill.active {
+            background: var(--accent-primary);
+            color: white;
+            border-color: var(--accent-primary);
+        }
+
+        .server-pill.add {
+            background: transparent;
+            border: 1px dashed var(--border);
+            color: var(--text-muted);
+        }
+
+        .server-pill.add:hover {
+            border-color: var(--accent-primary);
+            color: var(--accent-primary);
+        }
+
+        /* Channel List */
+        .channel-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px 12px;
+        }
+
+        .channel-section {
+            margin-bottom: 20px;
+        }
+
+        .channel-section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 8px;
+            margin-bottom: 8px;
+        }
+
+        .channel-section-title {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+        }
+
+        .channel-section-add {
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+
+        .channel-section-add:hover {
+            background: var(--bg-hover);
+            color: var(--accent-primary);
+        }
+
+        .channel-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all 0.15s;
+            margin-bottom: 2px;
+        }
+
+        .channel-item:hover {
+            background: var(--bg-hover);
+        }
+
+        .channel-item.active {
+            background: var(--bg-elevated);
+            border-left: 3px solid var(--accent-primary);
+            padding-left: 9px;
+        }
+
+        .channel-icon {
+            font-size: 16px;
+            color: var(--text-muted);
+        }
+
+        .channel-item.active .channel-icon {
+            color: var(--accent-primary);
+        }
+
+        .channel-name {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .channel-item.active .channel-name {
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        .channel-badge {
+            margin-left: auto;
+            padding: 2px 8px;
+            background: var(--accent-primary);
+            border-radius: var(--radius-xl);
+            font-size: 11px;
+            font-weight: 600;
+            color: white;
+        }
+
+        /* Voice Channel with Users */
+        .voice-channel {
+            background: var(--bg-elevated);
+            border-radius: var(--radius-md);
+            margin-bottom: 4px;
+            overflow: hidden;
+        }
+
+        .voice-channel-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+
+        .voice-channel-header:hover {
+            background: var(--bg-hover);
+        }
+
+        .voice-channel.active .voice-channel-header {
+            border-left: 3px solid var(--success);
+            padding-left: 9px;
+        }
+
+        .voice-channel.active .channel-icon {
+            color: var(--success);
+        }
+
+        .voice-users {
+            padding: 4px 12px 12px 36px;
+        }
+
+        .voice-user {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 6px 8px;
+            border-radius: var(--radius-sm);
+            margin-bottom: 2px;
+        }
+
+        .voice-user:hover {
+            background: rgba(255,255,255,0.03);
+        }
+
+        .voice-user-avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .voice-user-avatar.speaking {
+            box-shadow: 0 0 0 2px var(--success);
+        }
+
+        .voice-user-name {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .voice-user-status {
+            margin-left: auto;
+            display: flex;
+            gap: 4px;
+            color: var(--danger);
+            font-size: 14px;
+        }
+
+        /* User Panel */
+        .user-panel {
+            padding: 12px;
+            border-top: 1px solid var(--border);
+            background: var(--bg-elevated);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .user-details {
+            flex: 1;
+        }
+
+        .user-name {
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .user-status {
+            font-size: 12px;
+            color: var(--success);
+        }
+
+        .user-controls {
+            display: flex;
+            gap: 4px;
+        }
+
+        .user-control-btn {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-surface);
+            border: none;
+            border-radius: var(--radius-sm);
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .user-control-btn:hover {
+            background: var(--bg-hover);
+            color: var(--text-primary);
+        }
+
+        .user-control-btn.muted {
+            color: var(--danger);
+            background: rgba(231, 76, 60, 0.15);
+        }
+
+        /* Main Content Area */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+        }
+
+        /* Top Bar */
+        .top-bar {
+            height: 60px;
+            background: var(--bg-surface);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            padding: 0 24px;
+            gap: 16px;
+        }
+
+        .channel-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .channel-title-icon {
+            font-size: 20px;
+            color: var(--text-muted);
+        }
+
+        .channel-title-text {
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .channel-description {
+            color: var(--text-muted);
+            font-size: 13px;
+            padding-left: 16px;
+            border-left: 1px solid var(--border);
+            margin-left: 16px;
+        }
+
+        .top-bar-actions {
+            margin-left: auto;
+            display: flex;
+            gap: 8px;
+        }
+
+        .top-bar-btn {
+            padding: 8px 16px;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            color: var(--text-secondary);
+            font-size: 13px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.15s;
+        }
+
+        .top-bar-btn:hover {
+            background: var(--bg-hover);
+            color: var(--text-primary);
+        }
+
+        /* Messages Area */
+        .messages-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px;
+        }
+
+        .message {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 24px;
+            padding: 12px 16px;
+            border-radius: var(--radius-lg);
+            transition: background 0.15s;
+        }
+
+        .message:hover {
+            background: var(--bg-surface);
+        }
+
+        .message-avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: var(--radius-md);
+            background: linear-gradient(135deg, #00d2ff, #3a7bd5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+
+        .message-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .message-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 6px;
+        }
+
+        .message-author {
+            font-weight: 600;
+            font-size: 15px;
+        }
+
+        .message-time {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .message-text {
+            font-size: 15px;
+            line-height: 1.6;
+            color: var(--text-secondary);
+        }
+
+        .message-reactions {
+            display: flex;
+            gap: 6px;
+            margin-top: 10px;
+        }
+
+        .reaction {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 10px;
+            background: var(--bg-elevated);
+            border-radius: var(--radius-xl);
+            font-size: 13px;
+            cursor: pointer;
+            border: 1px solid transparent;
+            transition: all 0.15s;
+        }
+
+        .reaction:hover {
+            border-color: var(--border);
+        }
+
+        .reaction.active {
+            background: rgba(255, 107, 44, 0.15);
+            border-color: var(--accent-primary);
+        }
+
+        .reaction-count {
+            color: var(--text-secondary);
+        }
+
+        /* Input Area */
+        .input-area {
+            padding: 16px 24px 24px;
+        }
+
+        .input-container {
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            display: flex;
+            align-items: center;
+            padding: 4px;
+            transition: border-color 0.2s;
+        }
+
+        .input-container:focus-within {
+            border-color: var(--accent-primary);
+        }
+
+        .input-field {
+            flex: 1;
+            background: transparent;
+            border: none;
+            padding: 14px 16px;
+            font-size: 15px;
+            color: var(--text-primary);
+            font-family: inherit;
+            outline: none;
+        }
+
+        .input-field::placeholder {
+            color: var(--text-muted);
+        }
+
+        .input-actions {
+            display: flex;
+            gap: 4px;
+            padding-right: 8px;
+        }
+
+        .input-action-btn {
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: transparent;
+            border: none;
+            border-radius: var(--radius-sm);
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .input-action-btn:hover {
+            background: var(--bg-hover);
+            color: var(--text-primary);
+        }
+
+        .input-send-btn {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--accent-primary);
+            border: none;
+            border-radius: var(--radius-md);
+            color: white;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .input-send-btn:hover {
+            background: var(--accent-secondary);
+        }
+
+        /* Right Panel - Members */
+        .members-panel {
+            width: 260px;
+            background: var(--bg-surface);
+            border-left: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .members-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .members-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .members-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px;
+        }
+
+        .members-section {
+            margin-bottom: 20px;
+        }
+
+        .members-section-title {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            padding: 0 8px 8px;
+        }
+
+        .member-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 10px;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+
+        .member-item:hover {
+            background: var(--bg-hover);
+        }
+
+        .member-avatar {
+            position: relative;
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #f093fb, #f5576c);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 13px;
+        }
+
+        .member-status-dot {
+            position: absolute;
+            bottom: -1px;
+            right: -1px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--success);
+            border: 3px solid var(--bg-surface);
+        }
+
+        .member-status-dot.offline {
+            background: var(--text-muted);
+        }
+
+        .member-name {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .member-item:hover .member-name {
+            color: var(--text-primary);
+        }
+
+        .member-role {
+            font-size: 11px;
+            color: var(--warning);
+        }
+
+        /* Voice Status Bar */
+        .voice-status-bar {
+            margin: 12px;
+            padding: 16px;
+            background: linear-gradient(135deg, rgba(46, 204, 113, 0.1), rgba(46, 204, 113, 0.05));
+            border: 1px solid rgba(46, 204, 113, 0.2);
+            border-radius: var(--radius-lg);
+        }
+
+        .voice-status-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .voice-status-icon {
+            font-size: 18px;
+            color: var(--success);
+        }
+
+        .voice-status-text {
+            flex: 1;
+        }
+
+        .voice-status-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--success);
+        }
+
+        .voice-status-channel {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .voice-status-controls {
+            display: flex;
+            gap: 8px;
+        }
+
+        .voice-control {
+            flex: 1;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-elevated);
+            border: none;
+            border-radius: var(--radius-md);
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .voice-control:hover {
+            background: var(--bg-hover);
+            color: var(--text-primary);
+        }
+
+        .voice-control.disconnect {
+            background: rgba(231, 76, 60, 0.15);
+            color: var(--danger);
+        }
+
+        .voice-control.disconnect:hover {
+            background: var(--danger);
+            color: white;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--bg-hover);
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text-muted);
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Left Navigation Panel -->
+        <div class="nav-panel">
+            <!-- Logo -->
+            <div class="logo-area">
+                <div class="logo">
+                    <div class="logo-icon">R1</div>
+                    <div class="logo-text">R1<span>Gate</span></div>
+                </div>
+            </div>
+
+            <!-- Server Switcher -->
+            <div class="server-switcher">
+                <div class="server-pills">
+                    <div class="server-pill active">Development</div>
+                    <div class="server-pill">Design Team</div>
+                    <div class="server-pill">Gaming</div>
+                    <div class="server-pill add">+</div>
+                </div>
+            </div>
+
+            <!-- Channel List -->
+            <div class="channel-list">
+                <!-- Text Channels -->
+                <div class="channel-section">
+                    <div class="channel-section-header">
+                        <span class="channel-section-title">Текстовые</span>
+                        <div class="channel-section-add">+</div>
+                    </div>
+                    <div class="channel-item active">
+                        <span class="channel-icon">#</span>
+                        <span class="channel-name">general</span>
+                        <span class="channel-badge">3</span>
+                    </div>
+                    <div class="channel-item">
+                        <span class="channel-icon">#</span>
+                        <span class="channel-name">random</span>
+                    </div>
+                    <div class="channel-item">
+                        <span class="channel-icon">#</span>
+                        <span class="channel-name">off-topic</span>
+                    </div>
+                </div>
+
+                <!-- Voice Channels -->
+                <div class="channel-section">
+                    <div class="channel-section-header">
+                        <span class="channel-section-title">Голосовые</span>
+                        <div class="channel-section-add">+</div>
+                    </div>
+                    <div class="voice-channel active">
+                        <div class="voice-channel-header">
+                            <span class="channel-icon">🔊</span>
+                            <span class="channel-name">Основной</span>
+                        </div>
+                        <div class="voice-users">
+                            <div class="voice-user">
+                                <div class="voice-user-avatar speaking">A</div>
+                                <span class="voice-user-name">Alex</span>
+                            </div>
+                            <div class="voice-user">
+                                <div class="voice-user-avatar">M</div>
+                                <span class="voice-user-name">Maria</span>
+                                <div class="voice-user-status">🔇</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="voice-channel">
+                        <div class="voice-channel-header">
+                            <span class="channel-icon">🔊</span>
+                            <span class="channel-name">Gaming</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Voice Status Bar -->
+            <div class="voice-status-bar">
+                <div class="voice-status-info">
+                    <span class="voice-status-icon">📞</span>
+                    <div class="voice-status-text">
+                        <div class="voice-status-label">Подключен • 12ms</div>
+                        <div class="voice-status-channel">Основной</div>
+                    </div>
+                </div>
+                <div class="voice-status-controls">
+                    <button class="voice-control">🎤</button>
+                    <button class="voice-control">🎧</button>
+                    <button class="voice-control">📺</button>
+                    <button class="voice-control disconnect">📵</button>
+                </div>
+            </div>
+
+            <!-- User Panel -->
+            <div class="user-panel">
+                <div class="user-info">
+                    <div class="user-avatar">U</div>
+                    <div class="user-details">
+                        <div class="user-name">Username</div>
+                        <div class="user-status">В сети</div>
+                    </div>
+                    <div class="user-controls">
+                        <button class="user-control-btn">⚙️</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Top Bar -->
+            <div class="top-bar">
+                <div class="channel-title">
+                    <span class="channel-title-icon">#</span>
+                    <span class="channel-title-text">general</span>
+                </div>
+                <span class="channel-description">Основной канал для общения</span>
+                <div class="top-bar-actions">
+                    <button class="top-bar-btn">👥 Участники</button>
+                    <button class="top-bar-btn">🔍 Поиск</button>
+                </div>
+            </div>
+
+            <!-- Messages -->
+            <div class="messages-area">
+                <div class="message">
+                    <div class="message-avatar" style="background: linear-gradient(135deg, #667eea, #764ba2);">A</div>
+                    <div class="message-content">
+                        <div class="message-header">
+                            <span class="message-author">Alex</span>
+                            <span class="message-time">Сегодня в 14:32</span>
+                        </div>
+                        <div class="message-text">Привет всем! Как продвигается работа над проектом? Есть какие-то обновления?</div>
+                        <div class="message-reactions">
+                            <div class="reaction active">
+                                <span>👍</span>
+                                <span class="reaction-count">3</span>
+                            </div>
+                            <div class="reaction">
+                                <span>🔥</span>
+                                <span class="reaction-count">1</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="message">
+                    <div class="message-avatar" style="background: linear-gradient(135deg, #f093fb, #f5576c);">M</div>
+                    <div class="message-content">
+                        <div class="message-header">
+                            <span class="message-author">Maria</span>
+                            <span class="message-time">Сегодня в 14:35</span>
+                        </div>
+                        <div class="message-text">Да, мы уже почти закончили с основным функционалом. Осталось только протестировать и исправить мелкие баги.</div>
+                    </div>
+                </div>
+
+                <div class="message">
+                    <div class="message-avatar" style="background: linear-gradient(135deg, #00d2ff, #3a7bd5);">D</div>
+                    <div class="message-content">
+                        <div class="message-header">
+                            <span class="message-author">Dmitry</span>
+                            <span class="message-time">Сегодня в 14:40</span>
+                        </div>
+                        <div class="message-text">Отлично! Я как раз заканчиваю с документацией. Можем завтра созвониться и обсудить релиз?</div>
+                        <div class="message-reactions">
+                            <div class="reaction">
+                                <span>✅</span>
+                                <span class="reaction-count">2</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Input -->
+            <div class="input-area">
+                <div class="input-container">
+                    <input type="text" class="input-field" placeholder="Написать в #general...">
+                    <div class="input-actions">
+                        <button class="input-action-btn">😀</button>
+                        <button class="input-action-btn">📎</button>
+                    </div>
+                    <button class="input-send-btn">→</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Members Panel -->
+        <div class="members-panel">
+            <div class="members-header">
+                <div class="members-title">Участники — 12</div>
+            </div>
+            <div class="members-list">
+                <div class="members-section">
+                    <div class="members-section-title">Онлайн — 4</div>
+                    <div class="member-item">
+                        <div class="member-avatar" style="background: linear-gradient(135deg, #667eea, #764ba2);">
+                            A
+                            <div class="member-status-dot"></div>
+                        </div>
+                        <div>
+                            <div class="member-name">Alex</div>
+                            <div class="member-role">Владелец</div>
+                        </div>
+                    </div>
+                    <div class="member-item">
+                        <div class="member-avatar" style="background: linear-gradient(135deg, #f093fb, #f5576c);">
+                            M
+                            <div class="member-status-dot"></div>
+                        </div>
+                        <div class="member-name">Maria</div>
+                    </div>
+                    <div class="member-item">
+                        <div class="member-avatar" style="background: linear-gradient(135deg, #00d2ff, #3a7bd5);">
+                            D
+                            <div class="member-status-dot"></div>
+                        </div>
+                        <div class="member-name">Dmitry</div>
+                    </div>
+                    <div class="member-item">
+                        <div class="member-avatar" style="background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));">
+                            U
+                            <div class="member-status-dot"></div>
+                        </div>
+                        <div class="member-name">Username (вы)</div>
+                    </div>
+                </div>
+
+                <div class="members-section">
+                    <div class="members-section-title">Офлайн — 8</div>
+                    <div class="member-item" style="opacity: 0.5;">
+                        <div class="member-avatar" style="background: #444;">
+                            K
+                            <div class="member-status-dot offline"></div>
+                        </div>
+                        <div class="member-name">Kate</div>
+                    </div>
+                    <div class="member-item" style="opacity: 0.5;">
+                        <div class="member-avatar" style="background: #444;">
+                            P
+                            <div class="member-status-dot offline"></div>
+                        </div>
+                        <div class="member-name">Pavel</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

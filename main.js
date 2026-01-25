@@ -146,7 +146,8 @@ function createMainWindow() {
   // Show loading status in splash
   sendStatusToSplash('loading');
 
-  mainWindow.loadURL('https://web.r1gate.ru');
+  // Load local frontend
+  mainWindow.loadFile(path.join(__dirname, 'web', 'index.html'));
 
   // Wait until page is fully rendered
   let windowShown = false;

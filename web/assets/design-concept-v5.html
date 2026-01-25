@@ -1,0 +1,1161 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>R1Gate - Design Concept v5</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-dark: #09090b;
+            --bg-main: #0f0f12;
+            --bg-card: #18181b;
+            --bg-hover: #27272a;
+            --bg-active: #3f3f46;
+
+            --text-primary: #fafafa;
+            --text-secondary: #a1a1aa;
+            --text-muted: #71717a;
+            --text-faint: #52525b;
+
+            --accent: #10b981;
+            --accent-hover: #34d399;
+            --accent-soft: rgba(16, 185, 129, 0.15);
+
+            --blue: #3b82f6;
+            --purple: #8b5cf6;
+            --pink: #ec4899;
+            --orange: #f97316;
+            --red: #ef4444;
+
+            --border: rgba(255, 255, 255, 0.06);
+            --border-hover: rgba(255, 255, 255, 0.1);
+
+            --radius: 12px;
+            --radius-sm: 8px;
+            --radius-lg: 16px;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+
+        /* ========== LAYOUT ========== */
+        .app {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            grid-template-rows: 1fr;
+            height: 100vh;
+        }
+
+        /* ========== LEFT SIDEBAR - SERVERS & CHANNELS ========== */
+        .sidebar {
+            background: var(--bg-main);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* Logo */
+        .logo {
+            padding: 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-mark {
+            width: 42px;
+            height: 42px;
+            background: linear-gradient(135deg, var(--accent), var(--blue));
+            border-radius: var(--radius);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 16px;
+        }
+
+        .logo-text {
+            font-size: 22px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .logo-text span {
+            background: linear-gradient(135deg, var(--accent), var(--blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Servers Section */
+        .servers-section {
+            padding: 16px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .section-title {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+        }
+
+        .section-action {
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.15s;
+        }
+
+        .section-action:hover {
+            background: var(--bg-hover);
+            color: var(--accent);
+            border-color: var(--accent);
+        }
+
+        /* Server Cards */
+        .servers-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .server-card {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 12px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .server-card:hover {
+            background: var(--bg-hover);
+            border-color: var(--border-hover);
+        }
+
+        .server-card.active {
+            background: var(--accent-soft);
+            border-color: var(--accent);
+        }
+
+        .server-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+
+        .server-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .server-name {
+            font-size: 14px;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .server-meta {
+            font-size: 12px;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .server-online {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .server-online::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            background: var(--accent);
+            border-radius: 50%;
+        }
+
+        .server-badge {
+            padding: 2px 6px;
+            background: var(--red);
+            border-radius: 10px;
+            font-size: 10px;
+            font-weight: 600;
+            margin-left: auto;
+        }
+
+        /* Channels Section */
+        .channels-section {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+        }
+
+        .channel-group {
+            margin-bottom: 16px;
+        }
+
+        .channel-group-header {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 8px;
+            color: var(--text-muted);
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+        }
+
+        .channel-group-header:hover {
+            color: var(--text-secondary);
+        }
+
+        .channel-list {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .channel {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 10px;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: all 0.15s;
+            color: var(--text-secondary);
+        }
+
+        .channel:hover {
+            background: var(--bg-card);
+            color: var(--text-primary);
+        }
+
+        .channel.active {
+            background: var(--accent-soft);
+            color: var(--accent);
+        }
+
+        .channel-icon {
+            width: 20px;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        .channel-name {
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .channel-unread {
+            margin-left: auto;
+            min-width: 18px;
+            height: 18px;
+            padding: 0 5px;
+            background: var(--accent);
+            border-radius: 9px;
+            font-size: 11px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+
+        /* Voice Channel Expanded */
+        .voice-channel {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            margin-bottom: 4px;
+            overflow: hidden;
+        }
+
+        .voice-channel-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 10px;
+            cursor: pointer;
+            color: var(--text-secondary);
+            transition: all 0.15s;
+        }
+
+        .voice-channel-header:hover {
+            color: var(--text-primary);
+        }
+
+        .voice-channel.active .voice-channel-header {
+            color: var(--accent);
+        }
+
+        .voice-users-list {
+            padding: 4px 10px 10px 32px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .voice-user {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 4px 6px;
+            border-radius: var(--radius-sm);
+        }
+
+        .voice-user:hover {
+            background: var(--bg-hover);
+        }
+
+        .voice-user-avatar {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: 600;
+        }
+
+        .voice-user-avatar.speaking {
+            box-shadow: 0 0 0 2px var(--accent);
+        }
+
+        .voice-user-name {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .voice-user-icons {
+            margin-left: auto;
+            display: flex;
+            gap: 4px;
+            font-size: 12px;
+            color: var(--red);
+        }
+
+        /* User Panel */
+        .user-panel {
+            padding: 12px 16px;
+            background: var(--bg-card);
+            border-top: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 14px;
+            background: linear-gradient(135deg, var(--accent), var(--blue));
+        }
+
+        .user-info {
+            flex: 1;
+        }
+
+        .user-name {
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .user-status {
+            font-size: 12px;
+            color: var(--accent);
+        }
+
+        .user-actions {
+            display: flex;
+            gap: 4px;
+        }
+
+        .user-action-btn {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-main);
+            border: none;
+            border-radius: var(--radius-sm);
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.15s;
+        }
+
+        .user-action-btn:hover {
+            background: var(--bg-hover);
+            color: var(--text-primary);
+        }
+
+        .user-action-btn.danger {
+            color: var(--red);
+        }
+
+        .user-action-btn.danger:hover {
+            background: rgba(239, 68, 68, 0.15);
+        }
+
+        /* Voice Connected Bar */
+        .voice-bar {
+            margin: 0 16px 12px;
+            padding: 12px;
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            border-radius: var(--radius);
+        }
+
+        .voice-bar-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .voice-bar-icon {
+            font-size: 16px;
+        }
+
+        .voice-bar-text {
+            flex: 1;
+        }
+
+        .voice-bar-status {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--accent);
+        }
+
+        .voice-bar-channel {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .voice-bar-controls {
+            display: flex;
+            gap: 6px;
+        }
+
+        .voice-bar-btn {
+            flex: 1;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-card);
+            border: none;
+            border-radius: var(--radius-sm);
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.15s;
+        }
+
+        .voice-bar-btn:hover {
+            background: var(--bg-hover);
+            color: var(--text-primary);
+        }
+
+        .voice-bar-btn.disconnect {
+            background: rgba(239, 68, 68, 0.15);
+            color: var(--red);
+        }
+
+        .voice-bar-btn.disconnect:hover {
+            background: var(--red);
+            color: white;
+        }
+
+        /* ========== MAIN CONTENT ========== */
+        .main {
+            display: flex;
+            flex-direction: column;
+            background: var(--bg-dark);
+        }
+
+        /* Top Header */
+        .header {
+            height: 56px;
+            padding: 0 20px;
+            background: var(--bg-main);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .header-channel {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .header-channel-icon {
+            font-size: 18px;
+            color: var(--text-muted);
+        }
+
+        .header-channel-name {
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .header-divider {
+            width: 1px;
+            height: 24px;
+            background: var(--border);
+        }
+
+        .header-description {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .header-actions {
+            margin-left: auto;
+            display: flex;
+            gap: 8px;
+        }
+
+        .header-btn {
+            padding: 8px 14px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            color: var(--text-secondary);
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.15s;
+        }
+
+        .header-btn:hover {
+            background: var(--bg-hover);
+            color: var(--text-primary);
+            border-color: var(--border-hover);
+        }
+
+        /* Messages Container */
+        .messages-container {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+        }
+
+        .messages-scroll {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        /* Message */
+        .message {
+            display: flex;
+            gap: 14px;
+            padding: 12px 16px;
+            border-radius: var(--radius);
+            margin-bottom: 4px;
+            transition: background 0.15s;
+        }
+
+        .message:hover {
+            background: var(--bg-main);
+        }
+
+        .message-avatar {
+            width: 42px;
+            height: 42px;
+            border-radius: var(--radius);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+
+        .message-body {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .message-header {
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
+            margin-bottom: 4px;
+        }
+
+        .message-author {
+            font-weight: 600;
+            font-size: 15px;
+        }
+
+        .message-time {
+            font-size: 12px;
+            color: var(--text-faint);
+        }
+
+        .message-content {
+            font-size: 15px;
+            line-height: 1.5;
+            color: var(--text-secondary);
+        }
+
+        .message-reactions {
+            display: flex;
+            gap: 6px;
+            margin-top: 8px;
+        }
+
+        .reaction {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 8px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .reaction:hover {
+            border-color: var(--border-hover);
+        }
+
+        .reaction.active {
+            background: var(--accent-soft);
+            border-color: var(--accent);
+        }
+
+        .reaction-count {
+            color: var(--text-muted);
+            font-size: 12px;
+        }
+
+        /* Members Sidebar */
+        .members-sidebar {
+            width: 240px;
+            background: var(--bg-main);
+            border-left: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .members-header {
+            padding: 16px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .members-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .members-scroll {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px;
+        }
+
+        .members-group {
+            margin-bottom: 16px;
+        }
+
+        .members-group-title {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-faint);
+            padding: 0 8px 8px;
+        }
+
+        .member {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 6px 8px;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+
+        .member:hover {
+            background: var(--bg-card);
+        }
+
+        .member-avatar {
+            position: relative;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 12px;
+        }
+
+        .member-status {
+            position: absolute;
+            bottom: -2px;
+            right: -2px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: 2px solid var(--bg-main);
+        }
+
+        .member-status.online { background: var(--accent); }
+        .member-status.offline { background: var(--text-faint); }
+
+        .member-name {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .member:hover .member-name {
+            color: var(--text-primary);
+        }
+
+        .member-role {
+            font-size: 11px;
+            color: var(--orange);
+        }
+
+        /* Input Area */
+        .input-area {
+            padding: 0 20px 20px;
+        }
+
+        .input-wrapper {
+            background: var(--bg-main);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            display: flex;
+            align-items: center;
+            transition: border-color 0.15s;
+        }
+
+        .input-wrapper:focus-within {
+            border-color: var(--accent);
+        }
+
+        .input-field {
+            flex: 1;
+            background: transparent;
+            border: none;
+            padding: 14px 16px;
+            font-size: 15px;
+            font-family: inherit;
+            color: var(--text-primary);
+            outline: none;
+        }
+
+        .input-field::placeholder {
+            color: var(--text-faint);
+        }
+
+        .input-buttons {
+            display: flex;
+            padding-right: 8px;
+            gap: 4px;
+        }
+
+        .input-btn {
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: transparent;
+            border: none;
+            border-radius: var(--radius-sm);
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.15s;
+        }
+
+        .input-btn:hover {
+            background: var(--bg-card);
+            color: var(--text-primary);
+        }
+
+        .input-btn.send {
+            background: var(--accent);
+            color: white;
+        }
+
+        .input-btn.send:hover {
+            background: var(--accent-hover);
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--bg-hover);
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text-faint);
+        }
+    </style>
+</head>
+<body>
+    <div class="app">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <!-- Logo -->
+            <div class="logo">
+                <div class="logo-mark">R1</div>
+                <div class="logo-text">R1<span>Gate</span></div>
+            </div>
+
+            <!-- Servers -->
+            <div class="servers-section">
+                <div class="section-header">
+                    <span class="section-title">Серверы</span>
+                    <button class="section-action">+</button>
+                </div>
+                <div class="servers-grid">
+                    <div class="server-card active">
+                        <div class="server-avatar" style="background: linear-gradient(135deg, #10b981, #3b82f6);">D</div>
+                        <div class="server-info">
+                            <div class="server-name">Development</div>
+                            <div class="server-meta">
+                                <span class="server-online">4 онлайн</span>
+                            </div>
+                        </div>
+                        <span class="server-badge">3</span>
+                    </div>
+                    <div class="server-card">
+                        <div class="server-avatar" style="background: linear-gradient(135deg, #8b5cf6, #ec4899);">DT</div>
+                        <div class="server-info">
+                            <div class="server-name">Design Team</div>
+                            <div class="server-meta">
+                                <span class="server-online">2 онлайн</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="server-card">
+                        <div class="server-avatar" style="background: linear-gradient(135deg, #f97316, #ef4444);">G</div>
+                        <div class="server-info">
+                            <div class="server-name">Gaming</div>
+                            <div class="server-meta">
+                                <span class="server-online">8 онлайн</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Channels -->
+            <div class="channels-section">
+                <!-- Text Channels -->
+                <div class="channel-group">
+                    <div class="channel-group-header">
+                        <span>▾</span>
+                        <span>Текстовые каналы</span>
+                    </div>
+                    <div class="channel-list">
+                        <div class="channel active">
+                            <span class="channel-icon">#</span>
+                            <span class="channel-name">general</span>
+                            <span class="channel-unread">3</span>
+                        </div>
+                        <div class="channel">
+                            <span class="channel-icon">#</span>
+                            <span class="channel-name">random</span>
+                        </div>
+                        <div class="channel">
+                            <span class="channel-icon">#</span>
+                            <span class="channel-name">announcements</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Voice Channels -->
+                <div class="channel-group">
+                    <div class="channel-group-header">
+                        <span>▾</span>
+                        <span>Голосовые каналы</span>
+                    </div>
+                    <div class="channel-list">
+                        <div class="voice-channel active">
+                            <div class="voice-channel-header">
+                                <span class="channel-icon">🔊</span>
+                                <span class="channel-name">Основной</span>
+                            </div>
+                            <div class="voice-users-list">
+                                <div class="voice-user">
+                                    <div class="voice-user-avatar speaking" style="background: linear-gradient(135deg, #8b5cf6, #ec4899);">A</div>
+                                    <span class="voice-user-name">Alex</span>
+                                </div>
+                                <div class="voice-user">
+                                    <div class="voice-user-avatar" style="background: linear-gradient(135deg, #f97316, #ef4444);">M</div>
+                                    <span class="voice-user-name">Maria</span>
+                                    <span class="voice-user-icons">🔇</span>
+                                </div>
+                                <div class="voice-user">
+                                    <div class="voice-user-avatar" style="background: linear-gradient(135deg, #10b981, #3b82f6);">U</div>
+                                    <span class="voice-user-name">Username (вы)</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="voice-channel">
+                            <div class="voice-channel-header">
+                                <span class="channel-icon">🔊</span>
+                                <span class="channel-name">Gaming</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Voice Bar -->
+            <div class="voice-bar">
+                <div class="voice-bar-info">
+                    <span class="voice-bar-icon">📞</span>
+                    <div class="voice-bar-text">
+                        <div class="voice-bar-status">Подключен • 15ms</div>
+                        <div class="voice-bar-channel">Основной</div>
+                    </div>
+                </div>
+                <div class="voice-bar-controls">
+                    <button class="voice-bar-btn">🎤</button>
+                    <button class="voice-bar-btn">🎧</button>
+                    <button class="voice-bar-btn">📺</button>
+                    <button class="voice-bar-btn disconnect">✕</button>
+                </div>
+            </div>
+
+            <!-- User Panel -->
+            <div class="user-panel">
+                <div class="user-avatar">U</div>
+                <div class="user-info">
+                    <div class="user-name">Username</div>
+                    <div class="user-status">В сети</div>
+                </div>
+                <div class="user-actions">
+                    <button class="user-action-btn">⚙️</button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main">
+            <!-- Header -->
+            <header class="header">
+                <div class="header-channel">
+                    <span class="header-channel-icon">#</span>
+                    <span class="header-channel-name">general</span>
+                </div>
+                <div class="header-divider"></div>
+                <span class="header-description">Основной канал для общения команды</span>
+                <div class="header-actions">
+                    <button class="header-btn">🔍 Поиск</button>
+                    <button class="header-btn">👥 Участники</button>
+                </div>
+            </header>
+
+            <!-- Messages -->
+            <div class="messages-container">
+                <div class="messages-scroll">
+                    <div class="message">
+                        <div class="message-avatar" style="background: linear-gradient(135deg, #8b5cf6, #ec4899);">A</div>
+                        <div class="message-body">
+                            <div class="message-header">
+                                <span class="message-author">Alex</span>
+                                <span class="message-time">Сегодня в 14:32</span>
+                            </div>
+                            <div class="message-content">Привет всем! Как продвигается работа над проектом? Есть какие-то обновления по редизайну?</div>
+                            <div class="message-reactions">
+                                <div class="reaction active">👍 <span class="reaction-count">3</span></div>
+                                <div class="reaction">🔥 <span class="reaction-count">1</span></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="message">
+                        <div class="message-avatar" style="background: linear-gradient(135deg, #f97316, #ef4444);">M</div>
+                        <div class="message-body">
+                            <div class="message-header">
+                                <span class="message-author">Maria</span>
+                                <span class="message-time">Сегодня в 14:35</span>
+                            </div>
+                            <div class="message-content">Да, мы уже почти закончили с основным функционалом. Осталось протестировать и исправить пару багов. Новый дизайн выглядит отлично!</div>
+                        </div>
+                    </div>
+
+                    <div class="message">
+                        <div class="message-avatar" style="background: linear-gradient(135deg, #3b82f6, #06b6d4);">D</div>
+                        <div class="message-body">
+                            <div class="message-header">
+                                <span class="message-author">Dmitry</span>
+                                <span class="message-time">Сегодня в 14:40</span>
+                            </div>
+                            <div class="message-content">Отлично! Я заканчиваю с документацией. Можем завтра созвониться и обсудить релиз? Предлагаю в 15:00.</div>
+                            <div class="message-reactions">
+                                <div class="reaction">✅ <span class="reaction-count">2</span></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="message">
+                        <div class="message-avatar" style="background: linear-gradient(135deg, #10b981, #3b82f6);">U</div>
+                        <div class="message-body">
+                            <div class="message-header">
+                                <span class="message-author">Username</span>
+                                <span class="message-time">Сегодня в 14:45</span>
+                            </div>
+                            <div class="message-content">Звучит как план! Я тоже буду.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Members Sidebar -->
+                <aside class="members-sidebar">
+                    <div class="members-header">
+                        <div class="members-title">Участники — 12</div>
+                    </div>
+                    <div class="members-scroll">
+                        <div class="members-group">
+                            <div class="members-group-title">Онлайн — 4</div>
+                            <div class="member">
+                                <div class="member-avatar" style="background: linear-gradient(135deg, #8b5cf6, #ec4899);">
+                                    A
+                                    <div class="member-status online"></div>
+                                </div>
+                                <div>
+                                    <div class="member-name">Alex</div>
+                                    <div class="member-role">Владелец</div>
+                                </div>
+                            </div>
+                            <div class="member">
+                                <div class="member-avatar" style="background: linear-gradient(135deg, #f97316, #ef4444);">
+                                    M
+                                    <div class="member-status online"></div>
+                                </div>
+                                <div class="member-name">Maria</div>
+                            </div>
+                            <div class="member">
+                                <div class="member-avatar" style="background: linear-gradient(135deg, #3b82f6, #06b6d4);">
+                                    D
+                                    <div class="member-status online"></div>
+                                </div>
+                                <div class="member-name">Dmitry</div>
+                            </div>
+                            <div class="member">
+                                <div class="member-avatar" style="background: linear-gradient(135deg, #10b981, #3b82f6);">
+                                    U
+                                    <div class="member-status online"></div>
+                                </div>
+                                <div class="member-name">Username (вы)</div>
+                            </div>
+                        </div>
+                        <div class="members-group">
+                            <div class="members-group-title">Офлайн — 8</div>
+                            <div class="member" style="opacity: 0.5;">
+                                <div class="member-avatar" style="background: #3f3f46;">
+                                    K
+                                    <div class="member-status offline"></div>
+                                </div>
+                                <div class="member-name">Kate</div>
+                            </div>
+                            <div class="member" style="opacity: 0.5;">
+                                <div class="member-avatar" style="background: #3f3f46;">
+                                    P
+                                    <div class="member-status offline"></div>
+                                </div>
+                                <div class="member-name">Pavel</div>
+                            </div>
+                        </div>
+                    </div>
+                </aside>
+            </div>
+
+            <!-- Input -->
+            <div class="input-area">
+                <div class="input-wrapper">
+                    <input type="text" class="input-field" placeholder="Написать в #general...">
+                    <div class="input-buttons">
+                        <button class="input-btn">😀</button>
+                        <button class="input-btn">📎</button>
+                        <button class="input-btn send">➤</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>
