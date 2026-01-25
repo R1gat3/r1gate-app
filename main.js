@@ -62,7 +62,31 @@ function createSplashWindow() {
   });
 }
 
-function checkForUpdates() {
+async function checkInternetConnection() {
+  try {
+    const { net } = require('electron');
+    const request = net.request('https://r1gate.ru');
+    return new Promise((resolve) => {
+      request.on('response', () => resolve(true));
+      request.on('error', () => resolve(false));
+      setTimeout(() => resolve(false), 5000);
+      request.end();
+    });
+  } catch {
+    return false;
+  }
+}
+
+async function checkForUpdates() {
+  // Check internet connection first
+  sendStatusToSplash('checking-connection');
+  const hasInternet = await checkInternetConnection();
+
+  if (!hasInternet) {
+    sendStatusToSplash('no-internet');
+    return; // Don't proceed without internet
+  }
+
   // In development, skip update check
   if (!app.isPackaged) {
     sendStatusToSplash('not-available');

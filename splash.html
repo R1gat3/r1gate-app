@@ -158,6 +158,21 @@
         const versionEl = document.getElementById('version');
 
         switch (status) {
+          case 'checking-connection':
+            statusEl.textContent = 'Checking connection...';
+            progressEl.className = 'progress-bar indeterminate';
+            break;
+
+          case 'no-internet':
+            statusEl.textContent = 'No internet connection';
+            statusEl.style.color = '#ff6b6b';
+            progressEl.className = 'progress-bar';
+            progressEl.style.width = '0%';
+            progressEl.style.backgroundColor = '#ff6b6b';
+            updateInfoEl.textContent = 'Please check your connection and restart';
+            updateInfoEl.style.color = '#ff6b6b';
+            break;
+
           case 'checking':
             statusEl.textContent = 'Checking for updates...';
             progressEl.className = 'progress-bar indeterminate';
