@@ -64,17 +64,19 @@ function createSplashWindow() {
 }
 
 async function checkInternetConnection() {
-  const https = require('https');
-  return new Promise((resolve) => {
-    const req = https.get('https://web.r1gate.ru', { timeout: 10000 }, (res) => {
-      resolve(res.statusCode === 200 || res.statusCode === 301 || res.statusCode === 302);
-    });
-    req.on('error', () => resolve(false));
-    req.on('timeout', () => {
-      req.destroy();
-      resolve(false);
-    });
-  });
+  const dns = require('dns').promises;
+  try {
+    await dns.lookup('web.r1gate.ru');
+    return true;
+  } catch {
+    // Fallback: try google
+    try {
+      await dns.lookup('google.com');
+      return true;
+    } catch {
+      return false;
+    }
+  }
 }
 
 async function checkForUpdates() {
