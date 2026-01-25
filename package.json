@@ -84,11 +84,6 @@
       "icon": "icon.png",
       "category": "Network",
       "artifactName": "R1Gate-Voice-${version}.${ext}"
-    },
-    "publish": {
-      "provider": "github",
-      "owner": "R1gat3",
-      "repo": "r1gate-app"
     }
   }
 }
