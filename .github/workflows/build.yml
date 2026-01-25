@@ -123,35 +123,24 @@ jobs:
           DEPLOY_PASS: ${{ secrets.DEPLOY_PASS }}
           DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
         run: |
+          # Debug: check variables are set
+          echo "Host: $DEPLOY_HOST"
+          echo "User: $DEPLOY_USER"
+          echo "Path: $DEPLOY_PATH"
+
           # Create directory if not exists
-          sshpass -p "$DEPLOY_PASS" ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${DEPLOY_USER}@${DEPLOY_HOST} "mkdir -p ${DEPLOY_PATH}"
+          sshpass -p "$DEPLOY_PASS" ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null "$DEPLOY_USER@$DEPLOY_HOST" "mkdir -p '$DEPLOY_PATH'"
 
-          # Upload all exe files
-          find artifacts -name "*.exe" -type f | while read f; do
-            echo "Uploading: $f"
-            sshpass -p "$DEPLOY_PASS" scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null "$f" ${DEPLOY_USER}@${DEPLOY_HOST}:${DEPLOY_PATH}/
-          done
+          # Flatten artifacts to single directory
+          mkdir -p upload
+          find artifacts -type f \( -name "*.exe" -o -name "*.yml" -o -name "*.AppImage" -o -name "*.deb" \) -exec cp {} upload/ \;
+          ls -la upload/
 
-          # Upload all yml files
-          find artifacts -name "*.yml" -type f | while read f; do
-            echo "Uploading: $f"
-            sshpass -p "$DEPLOY_PASS" scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null "$f" ${DEPLOY_USER}@${DEPLOY_HOST}:${DEPLOY_PATH}/
-          done
-
-          # Upload all AppImage files
-          find artifacts -name "*.AppImage" -type f | while read f; do
-            echo "Uploading: $f"
-            sshpass -p "$DEPLOY_PASS" scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null "$f" ${DEPLOY_USER}@${DEPLOY_HOST}:${DEPLOY_PATH}/
-          done
-
-          # Upload all deb files
-          find artifacts -name "*.deb" -type f | while read f; do
-            echo "Uploading: $f"
-            sshpass -p "$DEPLOY_PASS" scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null "$f" ${DEPLOY_USER}@${DEPLOY_HOST}:${DEPLOY_PATH}/
-          done
+          # Upload all files at once
+          sshpass -p "$DEPLOY_PASS" scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null upload/* "$DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH/"
 
           # Create/update symlinks for latest version
-          sshpass -p "$DEPLOY_PASS" ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${DEPLOY_USER}@${DEPLOY_HOST} "cd ${DEPLOY_PATH} && ln -sf \$(ls -t *.exe 2>/dev/null | head -1) R1Gate-Voice-Setup.exe || true"
-          sshpass -p "$DEPLOY_PASS" ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${DEPLOY_USER}@${DEPLOY_HOST} "cd ${DEPLOY_PATH} && ln -sf \$(ls -t *.AppImage 2>/dev/null | head -1) R1Gate-Voice.AppImage || true"
+          sshpass -p "$DEPLOY_PASS" ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null "$DEPLOY_USER@$DEPLOY_HOST" "cd '$DEPLOY_PATH' && ln -sf \$(ls -t *.exe 2>/dev/null | head -1) R1Gate-Voice-Setup.exe || true"
+          sshpass -p "$DEPLOY_PASS" ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null "$DEPLOY_USER@$DEPLOY_HOST" "cd '$DEPLOY_PATH' && ln -sf \$(ls -t *.AppImage 2>/dev/null | head -1) R1Gate-Voice.AppImage || true"
 
           echo "Deploy completed!"
