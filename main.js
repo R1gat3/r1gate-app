@@ -297,6 +297,9 @@ function createMainWindow() {
       contextIsolation: true,
       webSecurity: false,
       preload: path.join(__dirname, 'preload.js'),
+      // Включаем GPU ускорение для видео
+      enableWebRTC: true,
+      webgl: true,
     },
     autoHideMenuBar: true,
   });
@@ -391,6 +394,14 @@ ipcMain.on('window-maximize', () => {
 });
 ipcMain.on('window-close', () => mainWindow?.close());
 ipcMain.handle('window-is-maximized', () => mainWindow?.isMaximized() || false);
+
+// Fullscreen control for screen sharing
+ipcMain.on('window-fullscreen', (event, enable) => {
+  if (mainWindow) {
+    mainWindow.setFullScreen(enable);
+  }
+});
+ipcMain.handle('window-is-fullscreen', () => mainWindow?.isFullScreen() || false);
 
 // App ready
 app.whenReady().then(() => {

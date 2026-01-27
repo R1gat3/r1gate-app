@@ -12,6 +12,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
   windowClose: () => ipcRenderer.send('window-close'),
   windowIsMaximized: () => ipcRenderer.invoke('window-is-maximized'),
 
+  // Fullscreen controls
+  windowFullscreen: (enable) => ipcRenderer.send('window-fullscreen', enable),
+  windowIsFullscreen: () => ipcRenderer.invoke('window-is-fullscreen'),
+
   // Window maximize state listener
   onWindowMaximized: (callback) => {
     const handler = (event, isMaximized) => callback(isMaximized);
