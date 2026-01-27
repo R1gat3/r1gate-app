@@ -133,7 +133,7 @@ jobs:
 
           # Flatten artifacts to single directory
           mkdir -p upload
-          find artifacts -type f \( -name "*.exe" -o -name "*.yml" -o -name "*.AppImage" -o -name "*.deb" \) -exec cp {} upload/ \;
+          find artifacts -type f \( -name "*.exe" -o -name "*.yml" -o -name "*.AppImage" \) -exec cp {} upload/ \;
           ls -la upload/
 
           # Upload all files at once
