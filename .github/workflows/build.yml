@@ -39,37 +39,39 @@ jobs:
             dist/*.exe.blockmap
             dist/latest.yml
 
-  build-linux:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+  # TEMPORARILY DISABLED: Linux builds are too large for testing auto-update
+  # Re-enable when ready to deploy Linux version
+  # build-linux:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
+  #     - name: Setup Node.js
+  #       uses: actions/setup-node@v4
+  #       with:
+  #         node-version: '20'
+  #         cache: 'npm'
 
-      - name: Install dependencies
-        run: npm ci
+  #     - name: Install dependencies
+  #       run: npm ci
 
-      - name: Build for Linux
-        run: npm run build:linux
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #     - name: Build for Linux
+  #       run: npm run build:linux
+  #       env:
+  #         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: r1gate-linux
-          path: |
-            dist/*.AppImage
-            dist/*.deb
-            dist/latest-linux.yml
+  #     - name: Upload artifacts
+  #       uses: actions/upload-artifact@v4
+  #       with:
+  #         name: r1gate-linux
+  #         path: |
+  #           dist/*.AppImage
+  #           dist/*.deb
+  #           dist/latest-linux.yml
 
   release:
-    needs: [build-windows, build-linux]
+    needs: [build-windows]  # build-linux temporarily disabled
     if: always() && startsWith(github.ref, 'refs/tags/')
     runs-on: ubuntu-latest
 
@@ -99,7 +101,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   deploy:
-    needs: [build-windows, build-linux]
+    needs: [build-windows]  # build-linux temporarily disabled
     if: always() && startsWith(github.ref, 'refs/tags/')
     runs-on: ubuntu-latest
 
@@ -133,20 +135,19 @@ jobs:
 
           # Flatten artifacts to single directory
           mkdir -p upload
-          find artifacts -type f \( -name "*.exe" -o -name "*.yml" -o -name "*.AppImage" \) -exec cp {} upload/ \;
+          find artifacts -type f \( -name "*.exe" -o -name "*.yml" \) -exec cp {} upload/ \;
           ls -la upload/
 
           # Upload all files at once
           sshpass -p "$DEPLOY_PASS" scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null upload/* "$DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH/"
 
-          # Create/update symlinks for latest version
+          # Create/update symlink for latest Windows version (Linux builds temporarily disabled)
           sshpass -p "$DEPLOY_PASS" ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null "$DEPLOY_USER@$DEPLOY_HOST" "cd '$DEPLOY_PATH' && ln -sf \$(ls -t *.exe 2>/dev/null | head -1) R1Gate-Voice-Setup.exe || true"
-          sshpass -p "$DEPLOY_PASS" ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null "$DEPLOY_USER@$DEPLOY_HOST" "cd '$DEPLOY_PATH' && ln -sf \$(ls -t *.AppImage 2>/dev/null | head -1) R1Gate-Voice.AppImage || true"
 
           # Update version.json with new version from tag
           VERSION="${GITHUB_REF#refs/tags/v}"
           echo "Updating version.json to version: $VERSION"
-          sshpass -p "$DEPLOY_PASS" ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null "$DEPLOY_USER@$DEPLOY_HOST" "echo '{\"version\":\"'$VERSION'\",\"windows\":{\"url\":\"https://r1gate.ru/downloads/R1Gate-Voice-Setup.exe\",\"filename\":\"R1Gate-Voice-Setup.exe\"},\"linux\":{\"url\":\"https://r1gate.ru/downloads/R1Gate-Voice.AppImage\",\"filename\":\"R1Gate-Voice.AppImage\"}}' > '$DEPLOY_PATH/version.json'"
+          sshpass -p "$DEPLOY_PASS" ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null "$DEPLOY_USER@$DEPLOY_HOST" "echo '{\"version\":\"'$VERSION'\",\"windows\":{\"url\":\"https://r1gate.ru/downloads/R1Gate-Voice-Setup.exe\",\"filename\":\"R1Gate-Voice-Setup.exe\"}}' > '$DEPLOY_PATH/version.json'"
           echo "version.json updated!"
 
           echo "Deploy completed!"
