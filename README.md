@@ -88,6 +88,29 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
+## Code Signing
+
+R1Gate Desktop binaries are code-signed with a certificate from [SignPath Foundation](https://signpath.org/).
+
+**Certificate Issuer:** SignPath Foundation
+**Builds:** All releases are built using automated CI/CD pipeline on GitHub Actions, ensuring reproducible builds from public source code.
+
+This means that:
+- Binaries are verifiably built from the source code in this repository
+- The build process is transparent and auditable
+- SignPath Foundation validates the legitimacy of the build
+
+### Privacy Policy
+
+Please review our [Privacy Policy](PRIVACY_POLICY.md) which describes:
+- What data the desktop application collects (minimal: only update checks)
+- What data the R1Gate service collects when you use it
+- Your rights regarding your data
+
+## Security
+
+If you discover a security vulnerability, please report it via [GitHub Issues](https://github.com/R1gat3/r1gate-app/issues) or email: gaga.gaga.ga@mail.ru
+
 ## License
 
 This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
@@ -96,4 +119,5 @@ This project is licensed under the MIT License — see the [LICENSE](LICENSE) fi
 
 - [R1Gate Web](https://web.r1gate.ru)
 - [R1Gate Website](https://r1gate.ru)
+- [Privacy Policy](PRIVACY_POLICY.md)
 - [Report Issues](https://github.com/R1gat3/r1gate-app/issues)
