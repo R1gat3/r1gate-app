@@ -198,6 +198,7 @@ function createSplashWindow() {
     alwaysOnTop: true,
     resizable: false,
     skipTaskbar: true,
+    hasShadow: true,
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
