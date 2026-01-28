@@ -1,6 +1,6 @@
 {
   "name": "r1gate-app",
-  "version": "1.0.49",
+  "version": "1.0.50",
   "description": "R1Gate Voice - Desktop Application for voice communication",
   "main": "main.js",
   "homepage": "https://r1gate.ru",
@@ -66,8 +66,8 @@
       "publisherName": "R1Gate"
     },
     "nsis": {
-      "oneClick": false,
-      "allowToChangeInstallationDirectory": true,
+      "oneClick": true,
+      "runAfterFinish": true,
       "artifactName": "R1Gate-Voice-Setup-${version}.exe",
       "shortcutName": "R1Gate Voice"
     },
