@@ -290,6 +290,7 @@ function createMainWindow() {
     title: 'R1Gate Voice',
     icon: path.join(__dirname, 'icon.png'),
     frame: false,
+    titleBarStyle: 'hidden',
     show: false,
     backgroundColor: '#141819',
     webPreferences: {
