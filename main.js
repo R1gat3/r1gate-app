@@ -9,7 +9,7 @@ const VERSION_URL = 'https://r1gate.ru/downloads/version.json';
 const CHECK_UPDATES = process.argv.includes('--check-updates') || app.isPackaged;
 
 // Logger
-const logFile = path.join(app.getPath('userData'), 'r1gate.log');
+const logFile = path.join(app.getPath('userData'), 'rgconnect.log');
 
 function log(message) {
   const timestamp = new Date().toISOString();
@@ -66,7 +66,7 @@ function httpGet(url) {
         port: urlObj.port || 443,
         path: urlObj.pathname + urlObj.search,
         method: 'GET',
-        headers: { 'User-Agent': 'R1Gate/1.0' }
+        headers: { 'User-Agent': 'RGConnect/1.0' }
       };
 
       const req = https.request(options, (res) => {
@@ -119,7 +119,7 @@ function downloadFile(url, destPath, onProgress) {
         port: urlObj.port || 443,
         path: urlObj.pathname + urlObj.search,
         method: 'GET',
-        headers: { 'User-Agent': 'R1Gate/1.0' }
+        headers: { 'User-Agent': 'RGConnect/1.0' }
       };
 
       const req = https.request(options, (res) => {
@@ -243,7 +243,7 @@ async function checkForUpdates() {
 
       if (!downloadUrl) throw new Error('No download URL for platform');
 
-      const filename = process.platform === 'win32' ? 'R1Gate-Voice-Setup.exe' : 'R1Gate-Voice.AppImage';
+      const filename = process.platform === 'win32' ? 'RGConnect-Setup.exe' : 'RGConnect.AppImage';
       const downloadPath = path.join(app.getPath('temp'), filename);
 
       sendToSplash('downloading', { percent: 0 });
@@ -288,7 +288,7 @@ function createMainWindow() {
     height: 800,
     minWidth: 800,
     minHeight: 600,
-    title: 'R1Gate Voice',
+    title: 'RGConnect',
     icon: path.join(__dirname, 'icon.png'),
     frame: false,
     titleBarStyle: 'hidden',
@@ -357,7 +357,7 @@ function createTray() {
   tray = new Tray(path.join(__dirname, 'icon.png'));
 
   const contextMenu = Menu.buildFromTemplate([
-    { label: 'Open R1Gate', click: () => mainWindow?.show() },
+    { label: 'Open RGConnect', click: () => mainWindow?.show() },
     { type: 'separator' },
     {
       label: 'Exit',
@@ -368,7 +368,7 @@ function createTray() {
     }
   ]);
 
-  tray.setToolTip('R1Gate Voice');
+  tray.setToolTip('RGConnect');
   tray.setContextMenu(contextMenu);
   tray.on('click', () => mainWindow?.show());
 }
