@@ -256,16 +256,19 @@ async function checkForUpdates() {
       sendToSplash('downloaded');
 
       if (process.platform === 'win32') {
-        spawn(downloadPath, ['/S'], { detached: true, stdio: 'ignore', windowsHide: true }).unref();
+        // Don't use /S (silent) flag - it disables runAfterFinish
+        // One-click installer is fast anyway and will auto-start the app
+        spawn(downloadPath, [], { detached: true, stdio: 'ignore' }).unref();
       } else {
         fs.chmodSync(downloadPath, '755');
         spawn(downloadPath, [], { detached: true, stdio: 'ignore' }).unref();
       }
 
+      // Give installer time to start before quitting
       setTimeout(() => {
         log('Quitting for update');
         app.quit();
-      }, 2000);
+      }, 1000);
     } else {
       log('No update needed');
       sendToSplash('not-available');
