@@ -5,11 +5,11 @@ const https = require('https');
 const { spawn } = require('child_process');
 
 // Configuration
-const VERSION_URL = 'https://r1gate.ru/downloads/version.json';
+const VERSION_URL = 'https://rgconnect.ru/downloads/version.json';
 const CHECK_UPDATES = process.argv.includes('--check-updates') || app.isPackaged;
 
 // Logger
-const logFile = path.join(app.getPath('userData'), 'rgconnect.log');
+const logFile = path.join(app.getPath('userData'), 'r1gate.log');
 
 function log(message) {
   const timestamp = new Date().toISOString();
@@ -66,7 +66,7 @@ function httpGet(url) {
         port: urlObj.port || 443,
         path: urlObj.pathname + urlObj.search,
         method: 'GET',
-        headers: { 'User-Agent': 'RGConnect/1.0' }
+        headers: { 'User-Agent': 'R1Gate/1.0' }
       };
 
       const req = https.request(options, (res) => {
@@ -119,7 +119,7 @@ function downloadFile(url, destPath, onProgress) {
         port: urlObj.port || 443,
         path: urlObj.pathname + urlObj.search,
         method: 'GET',
-        headers: { 'User-Agent': 'RGConnect/1.0' }
+        headers: { 'User-Agent': 'R1Gate/1.0' }
       };
 
       const req = https.request(options, (res) => {
@@ -198,7 +198,6 @@ function createSplashWindow() {
     alwaysOnTop: true,
     resizable: false,
     skipTaskbar: true,
-    hasShadow: true,
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
@@ -243,7 +242,7 @@ async function checkForUpdates() {
 
       if (!downloadUrl) throw new Error('No download URL for platform');
 
-      const filename = process.platform === 'win32' ? 'RGConnect-Setup.exe' : 'RGConnect.AppImage';
+      const filename = process.platform === 'win32' ? 'R1Gate-Voice-Setup.exe' : 'R1Gate-Voice.AppImage';
       const downloadPath = path.join(app.getPath('temp'), filename);
 
       sendToSplash('downloading', { percent: 0 });
@@ -256,19 +255,16 @@ async function checkForUpdates() {
       sendToSplash('downloaded');
 
       if (process.platform === 'win32') {
-        // Don't use /S (silent) flag - it disables runAfterFinish
-        // One-click installer is fast anyway and will auto-start the app
-        spawn(downloadPath, [], { detached: true, stdio: 'ignore' }).unref();
+        spawn(downloadPath, ['/S'], { detached: true, stdio: 'ignore', windowsHide: true }).unref();
       } else {
         fs.chmodSync(downloadPath, '755');
         spawn(downloadPath, [], { detached: true, stdio: 'ignore' }).unref();
       }
 
-      // Give installer time to start before quitting
       setTimeout(() => {
         log('Quitting for update');
         app.quit();
-      }, 1000);
+      }, 2000);
     } else {
       log('No update needed');
       sendToSplash('not-available');
@@ -291,10 +287,9 @@ function createMainWindow() {
     height: 800,
     minWidth: 800,
     minHeight: 600,
-    title: 'RGConnect',
+    title: 'R1Gate Voice',
     icon: path.join(__dirname, 'icon.png'),
     frame: false,
-    titleBarStyle: 'hidden',
     show: false,
     backgroundColor: '#141819',
     webPreferences: {
@@ -328,7 +323,7 @@ function createMainWindow() {
   setTimeout(showWindow, 10000); // Fallback
 
   mainWindow.webContents.setWindowOpenHandler(({ url }) => {
-    if (url.startsWith('http') && !url.includes('r1gate.ru')) {
+    if (url.startsWith('http') && !url.includes('rgconnect.ru') && !url.includes('r1gate.ru')) {
       shell.openExternal(url);
       return { action: 'deny' };
     }
@@ -360,7 +355,7 @@ function createTray() {
   tray = new Tray(path.join(__dirname, 'icon.png'));
 
   const contextMenu = Menu.buildFromTemplate([
-    { label: 'Open RGConnect', click: () => mainWindow?.show() },
+    { label: 'Open R1Gate', click: () => mainWindow?.show() },
     { type: 'separator' },
     {
       label: 'Exit',
@@ -371,7 +366,7 @@ function createTray() {
     }
   ]);
 
-  tray.setToolTip('RGConnect');
+  tray.setToolTip('R1Gate Voice');
   tray.setContextMenu(contextMenu);
   tray.on('click', () => mainWindow?.show());
 }

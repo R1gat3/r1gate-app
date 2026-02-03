@@ -33,7 +33,7 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: rgconnect-win
+          name: r1gate-win
           path: |
             dist/*.exe
             dist/*.exe.blockmap
@@ -64,7 +64,7 @@ jobs:
   #     - name: Upload artifacts
   #       uses: actions/upload-artifact@v4
   #       with:
-  #         name: rgconnect-linux
+  #         name: r1gate-linux
   #         path: |
   #           dist/*.AppImage
   #           dist/*.deb
@@ -142,12 +142,12 @@ jobs:
           sshpass -p "$DEPLOY_PASS" scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null upload/* "$DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH/"
 
           # Create/update symlink for latest Windows version (Linux builds temporarily disabled)
-          sshpass -p "$DEPLOY_PASS" ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null "$DEPLOY_USER@$DEPLOY_HOST" "cd '$DEPLOY_PATH' && ln -sf \$(ls -t *.exe 2>/dev/null | head -1) RGConnect-Setup.exe || true"
+          sshpass -p "$DEPLOY_PASS" ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null "$DEPLOY_USER@$DEPLOY_HOST" "cd '$DEPLOY_PATH' && ln -sf \$(ls -t *.exe 2>/dev/null | head -1) R1Gate-Voice-Setup.exe || true"
 
           # Update version.json with new version from tag
           VERSION="${GITHUB_REF#refs/tags/v}"
           echo "Updating version.json to version: $VERSION"
-          sshpass -p "$DEPLOY_PASS" ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null "$DEPLOY_USER@$DEPLOY_HOST" "echo '{\"version\":\"'$VERSION'\",\"windows\":{\"url\":\"https://r1gate.ru/downloads/RGConnect-Setup.exe\",\"filename\":\"RGConnect-Setup.exe\"}}' > '$DEPLOY_PATH/version.json'"
+          sshpass -p "$DEPLOY_PASS" ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null "$DEPLOY_USER@$DEPLOY_HOST" "echo '{\"version\":\"'$VERSION'\",\"windows\":{\"url\":\"https://rgconnect.ru/downloads/R1Gate-Voice-Setup.exe\",\"filename\":\"R1Gate-Voice-Setup.exe\"}}' > '$DEPLOY_PATH/version.json'"
           echo "version.json updated!"
 
           echo "Deploy completed!"
