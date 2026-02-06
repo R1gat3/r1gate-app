@@ -1,8 +1,8 @@
-# RGConnect Desktop App
+# R1Gate Desktop App
 
-Desktop application for [RGConnect](https://r1gate.ru) — a voice communication platform.
+Desktop application for [R1Gate](https://r1gate.ru) — a voice communication platform.
 
-![RGConnect Logo](icon.svg)
+![R1Gate Logo](icon.svg)
 
 ## Features
 
@@ -90,7 +90,7 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## Code Signing
 
-RGConnect Desktop binaries are code-signed with a certificate from [SignPath Foundation](https://signpath.org/).
+R1Gate Desktop binaries are code-signed with a certificate from [SignPath Foundation](https://signpath.org/).
 
 **Certificate Issuer:** SignPath Foundation
 **Builds:** All releases are built using automated CI/CD pipeline on GitHub Actions, ensuring reproducible builds from public source code.
@@ -104,7 +104,7 @@ This means that:
 
 Please review our [Privacy Policy](PRIVACY_POLICY.md) which describes:
 - What data the desktop application collects (minimal: only update checks)
-- What data the RGConnect service collects when you use it
+- What data the R1Gate service collects when you use it
 - Your rights regarding your data
 
 ## Security
@@ -117,7 +117,7 @@ This project is licensed under the MIT License — see the [LICENSE](LICENSE) fi
 
 ## Links
 
-- [RGConnect Web](https://web.r1gate.ru)
-- [RGConnect Website](https://r1gate.ru)
+- [R1Gate Web](https://web.r1gate.ru)
+- [R1Gate Website](https://r1gate.ru)
 - [Privacy Policy](PRIVACY_POLICY.md)
 - [Report Issues](https://github.com/R1gat3/r1gate-app/issues)

@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>R1Gate Voice - Custom Window</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+      background: #0D0D0D;
+      color: #FFFFFF;
+      overflow: hidden;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Кастомная панель заголовка */
+    .titlebar {
+      height: 40px;
+      background: #1A1A1A;
+      border-bottom: 1px solid #2A2A2A;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 12px;
+      -webkit-app-region: drag; /* Делаем панель draggable */
+      user-select: none;
+    }
+
+    .titlebar-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .titlebar-logo {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .titlebar-logo svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    .titlebar-title {
+      font-size: 13px;
+      font-weight: 500;
+      color: #E0E0E0;
+    }
+
+    .titlebar-center {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .titlebar-status {
+      font-size: 12px;
+      color: #888;
+    }
+
+    .titlebar-controls {
+      display: flex;
+      gap: 8px;
+      -webkit-app-region: no-drag; /* Кнопки не должны быть draggable */
+    }
+
+    .titlebar-button {
+      width: 32px;
+      height: 32px;
+      border: none;
+      background: transparent;
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s;
+      color: #B3B3B3;
+    }
+
+    .titlebar-button:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: #FFFFFF;
+    }
+
+    .titlebar-button:active {
+      background: rgba(255, 255, 255, 0.12);
+    }
+
+    .titlebar-button.close:hover {
+      background: #E81123;
+      color: #FFFFFF;
+    }
+
+    .titlebar-button svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    /* Основной контент */
+    .content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px;
+      background: linear-gradient(135deg, #0D0D0D 0%, #1A1A1A 100%);
+    }
+
+    .demo-card {
+      background: #1E1E1E;
+      border: 1px solid #2A2A2A;
+      border-radius: 12px;
+      padding: 40px;
+      max-width: 600px;
+      text-align: center;
+    }
+
+    .demo-card h1 {
+      font-size: 32px;
+      margin-bottom: 16px;
+      background: linear-gradient(135deg, #00C853 0%, #69F0AE 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .demo-card p {
+      color: #B3B3B3;
+      line-height: 1.6;
+      margin-bottom: 24px;
+    }
+
+    .demo-buttons {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+    }
+
+    .demo-button {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .demo-button.primary {
+      background: #00C853;
+      color: #0D0D0D;
+    }
+
+    .demo-button.primary:hover {
+      background: #69F0AE;
+      transform: translateY(-1px);
+    }
+
+    .demo-button.secondary {
+      background: transparent;
+      color: #00C853;
+      border: 1px solid #00C853;
+    }
+
+    .demo-button.secondary:hover {
+      background: rgba(0, 200, 83, 0.1);
+    }
+
+    /* Информация о состоянии окна */
+    .window-info {
+      margin-top: 32px;
+      padding: 16px;
+      background: rgba(0, 200, 83, 0.1);
+      border: 1px solid rgba(0, 200, 83, 0.3);
+      border-radius: 8px;
+      font-size: 13px;
+      color: #00C853;
+    }
+  </style>
+</head>
+<body>
+  <!-- Кастомная панель заголовка -->
+  <div class="titlebar">
+    <div class="titlebar-left">
+      <div class="titlebar-logo">
+        <svg viewBox="0 0 100 100" fill="none">
+          <circle cx="30" cy="35" r="10" fill="#00C853"/>
+          <circle cx="70" cy="35" r="10" fill="#00C853"/>
+          <circle cx="50" cy="70" r="10" fill="#00C853"/>
+          <line x1="30" y1="35" x2="70" y2="35" stroke="#00C853" stroke-width="4"/>
+          <line x1="30" y1="35" x2="50" y2="70" stroke="#00C853" stroke-width="4"/>
+          <line x1="70" y1="35" x2="50" y2="70" stroke="#00C853" stroke-width="4"/>
+        </svg>
+        <span class="titlebar-title">R1Gate Voice</span>
+      </div>
+    </div>
+
+    <div class="titlebar-center">
+      <span class="titlebar-status">Custom Window Test</span>
+    </div>
+
+    <div class="titlebar-controls">
+      <button class="titlebar-button minimize" id="minimizeBtn" title="Свернуть">
+        <svg viewBox="0 0 16 16" fill="currentColor">
+          <rect x="3" y="7.5" width="10" height="1"/>
+        </svg>
+      </button>
+      <button class="titlebar-button maximize" id="maximizeBtn" title="Развернуть">
+        <svg viewBox="0 0 16 16" fill="currentColor">
+          <rect x="3" y="3" width="10" height="10" stroke="currentColor" stroke-width="1.5" fill="none"/>
+        </svg>
+      </button>
+      <button class="titlebar-button close" id="closeBtn" title="Закрыть">
+        <svg viewBox="0 0 16 16" fill="currentColor">
+          <path d="M3.5 3.5l9 9m0-9l-9 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Основной контент -->
+  <div class="content">
+    <div class="demo-card">
+      <h1>Кастомное окно</h1>
+      <p>
+        Это тестовое окно с кастомной панелью управления.
+        Вы можете перетаскивать окно за панель заголовка,
+        использовать кнопки минимизации, разворачивания и закрытия.
+      </p>
+      <div class="demo-buttons">
+        <button class="demo-button primary" onclick="alert('Кнопка работает!')">
+          Тестовая кнопка
+        </button>
+        <button class="demo-button secondary" onclick="testMaximize()">
+          Переключить размер
+        </button>
+      </div>
+      <div class="window-info" id="windowInfo">
+        Состояние окна: Нормальное
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Обработчики кнопок управления окном
+    const minimizeBtn = document.getElementById('minimizeBtn');
+    const maximizeBtn = document.getElementById('maximizeBtn');
+    const closeBtn = document.getElementById('closeBtn');
+    const windowInfo = document.getElementById('windowInfo');
+
+    minimizeBtn.addEventListener('click', () => {
+      window.electronAPI.windowMinimize();
+    });
+
+    maximizeBtn.addEventListener('click', () => {
+      window.electronAPI.windowMaximize();
+      updateWindowInfo();
+    });
+
+    closeBtn.addEventListener('click', () => {
+      window.electronAPI.windowClose();
+    });
+
+    // Обновление информации о состоянии окна
+    async function updateWindowInfo() {
+      const isMaximized = await window.electronAPI.windowIsMaximized();
+      windowInfo.textContent = isMaximized
+        ? 'Состояние окна: Развернуто'
+        : 'Состояние окна: Нормальное';
+    }
+
+    // Тестовая функция
+    function testMaximize() {
+      window.electronAPI.windowMaximize();
+      setTimeout(updateWindowInfo, 100);
+    }
+
+    // Обновляем состояние при загрузке
+    updateWindowInfo();
+  </script>
+</body>
+</html>

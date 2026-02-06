@@ -1,16 +1,16 @@
-# Privacy Policy for RGConnect Desktop Application
+# Privacy Policy for R1Gate Desktop Application
 
 **Last Updated:** January 27, 2026
 
 ## Overview
 
-RGConnect Desktop is a voice communication application that respects your privacy. This policy describes how the desktop application and RGConnect service handle data.
+R1Gate Desktop is a voice communication application that respects your privacy. This policy describes how the desktop application and R1Gate service handle data.
 
 ---
 
 ## Part 1: Desktop Application (No Data Collection)
 
-**The RGConnect Desktop Application itself does NOT automatically collect or transmit any personal user data.**
+**The R1Gate Desktop Application itself does NOT automatically collect or transmit any personal user data.**
 
 ### Automatic Network Requests
 
@@ -18,7 +18,7 @@ The application makes only one automatic network request:
 
 1. **Update Check** (optional)
    - **URL:** `https://r1gate.ru/downloads/version.json`
-   - **Data Sent:** Only application identifier (User-Agent: `RGConnect/1.0`)
+   - **Data Sent:** Only application identifier (User-Agent: `R1Gate/1.0`)
    - **Data Received:** Version number and download links for updates
    - **Purpose:** To notify users about available updates
    - **Personal Data Transmitted:** None
@@ -26,7 +26,7 @@ The application makes only one automatic network request:
 ### Local Data Storage
 
 The application stores the following data **locally on your device only**:
-- Application logs in `%APPDATA%/rgconnect-app/rgconnect.log` (Windows) or `~/.config/rgconnect-app/rgconnect.log` (Linux)
+- Application logs in `%APPDATA%/r1gate/r1gate.log` (Windows) or `~/.config/r1gate/r1gate.log` (Linux)
 - User preferences and settings
 - **This data never leaves your device**
 
@@ -36,9 +36,9 @@ The desktop application does not integrate any third-party analytics, tracking, 
 
 ---
 
-## Part 2: RGConnect Service (Data Collection When Using the Service)
+## Part 2: R1Gate Service (Data Collection When Using the Service)
 
-When you use the RGConnect service through the desktop application, the following data is collected and stored on our servers:
+When you use the R1Gate service through the desktop application, the following data is collected and stored on our servers:
 
 ### Account Information
 - **Username** - chosen by you during registration
@@ -57,7 +57,7 @@ When you use the RGConnect service through the desktop application, the followin
 
 ### Administrative Access
 
-RGConnect administrators have access to aggregated statistics through an admin panel at `web.r1gate.ru/admin`, including:
+R1Gate administrators have access to aggregated statistics through an admin panel at `web.r1gate.ru/admin`, including:
 
 **Aggregated Statistics:**
 - Total number of users, servers, channels, and messages
@@ -134,4 +134,4 @@ For privacy-related questions:
 
 **Repository:** https://github.com/R1gat3/r1gate-app
 **License:** MIT License
-**Copyright:** © 2025 RGConnect
+**Copyright:** © 2025 R1Gate

@@ -323,7 +323,7 @@ function createMainWindow() {
   setTimeout(showWindow, 10000); // Fallback
 
   mainWindow.webContents.setWindowOpenHandler(({ url }) => {
-    if (url.startsWith('http') && !url.includes('rgconnect.ru') && !url.includes('r1gate.ru')) {
+    if (url.startsWith('http') && !url.includes('r1gate.ru')) {
       shell.openExternal(url);
       return { action: 'deny' };
     }

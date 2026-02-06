@@ -1,7 +1,7 @@
 {
   "name": "r1gate-app",
-  "version": "1.1.32",
-  "description": "RGConnect - Desktop Application for voice communication",
+  "version": "1.1.33",
+  "description": "R1Gate Voice - Desktop Application for voice communication",
   "main": "main.js",
   "homepage": "https://rgconnect.ru",
   "repository": {
@@ -39,8 +39,8 @@
   },
   "build": {
     "appId": "ru.r1gate.voice",
-    "productName": "RGConnect",
-    "copyright": "Copyright © 2026 RGConnect",
+    "productName": "R1Gate Voice",
+    "copyright": "Copyright © 2025 R1Gate",
     "directories": {
       "output": "dist"
     },
@@ -63,15 +63,13 @@
         }
       ],
       "icon": "icon.png",
-      "publisherName": "RGConnect"
+      "publisherName": "R1Gate"
     },
     "nsis": {
-      "oneClick": true,
-      "perMachine": false,
-      "allowElevation": false,
-      "artifactName": "RGConnect-Setup-${version}.exe",
-      "shortcutName": "RGConnect",
-      "runAfterFinish": true
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "artifactName": "R1Gate-Voice-Setup-${version}.exe",
+      "shortcutName": "R1Gate Voice"
     },
     "mac": {
       "target": [
@@ -93,7 +91,7 @@
       ],
       "icon": "icon.png",
       "category": "Network",
-      "artifactName": "RGConnect-${version}.${ext}"
+      "artifactName": "R1Gate-Voice-${version}.${ext}"
     },
     "publish": {
       "provider": "github",
