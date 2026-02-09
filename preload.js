@@ -37,10 +37,14 @@ window.addEventListener('DOMContentLoaded', () => {
   titlebar.innerHTML = `
     <div class="titlebar-drag"></div>
     <div class="titlebar-center">
-      <svg class="titlebar-logo" width="16" height="16" viewBox="0 0 100 100" fill="none">
-        <circle cx="50" cy="50" r="45" stroke="#00C853" stroke-width="6"/>
-        <path d="M35 38 C35 30, 45 25, 50 25 C55 25, 65 30, 65 38 L65 50 C65 55, 60 58, 55 58 L50 58 L60 72 L50 72 L40 58 L45 58 C42 58, 35 55, 35 50 Z" fill="#00C853"/>
-        <circle cx="50" cy="42" r="6" fill="#1a1a2e"/>
+      <svg class="titlebar-logo" width="16" height="16" viewBox="0 0 256 256">
+        <rect width="256" height="256" rx="48" fill="#00C853"/>
+        <circle cx="77" cy="90" r="26" fill="#0D0D0D"/>
+        <circle cx="179" cy="90" r="26" fill="#0D0D0D"/>
+        <circle cx="128" cy="179" r="26" fill="#0D0D0D"/>
+        <line x1="77" y1="90" x2="179" y2="90" stroke="#0D0D0D" stroke-width="10"/>
+        <line x1="77" y1="90" x2="128" y2="179" stroke="#0D0D0D" stroke-width="10"/>
+        <line x1="179" y1="90" x2="128" y2="179" stroke="#0D0D0D" stroke-width="10"/>
       </svg>
       <span id="titlebar-text">RGConnect</span>
     </div>
@@ -65,7 +69,7 @@ window.addEventListener('DOMContentLoaded', () => {
       left: 0;
       right: 0;
       height: 32px;
-      background: #1a1a2e;
+      background: #141819;
       display: flex;
       align-items: center;
       justify-content: center;
