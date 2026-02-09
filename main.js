@@ -287,7 +287,7 @@ function createMainWindow() {
     height: 800,
     minWidth: 800,
     minHeight: 600,
-    title: 'R1Gate Voice',
+    title: 'RGConnect',
     icon: path.join(__dirname, 'icon.png'),
     frame: false,
     show: false,

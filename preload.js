@@ -22,16 +22,28 @@ contextBridge.exposeInMainWorld('electronAPI', {
     ipcRenderer.on('window-maximized', handler);
     return () => ipcRenderer.removeListener('window-maximized', handler);
   },
+
+  // Titlebar title update
+  setTitlebarTitle: (title) => {
+    const el = document.getElementById('titlebar-text');
+    if (el) el.textContent = title;
+  },
 });
 
-// Inject native titlebar controls when DOM is ready
+// Inject custom titlebar when DOM is ready
 window.addEventListener('DOMContentLoaded', () => {
-  // Create titlebar
   const titlebar = document.createElement('div');
   titlebar.id = 'electron-titlebar';
   titlebar.innerHTML = `
     <div class="titlebar-drag"></div>
-    <div class="titlebar-title">R1Gate Voice</div>
+    <div class="titlebar-center">
+      <svg class="titlebar-logo" width="16" height="16" viewBox="0 0 100 100" fill="none">
+        <circle cx="50" cy="50" r="45" stroke="#00C853" stroke-width="6"/>
+        <path d="M35 38 C35 30, 45 25, 50 25 C55 25, 65 30, 65 38 L65 50 C65 55, 60 58, 55 58 L50 58 L60 72 L50 72 L40 58 L45 58 C42 58, 35 55, 35 50 Z" fill="#00C853"/>
+        <circle cx="50" cy="42" r="6" fill="#1a1a2e"/>
+      </svg>
+      <span id="titlebar-text">RGConnect</span>
+    </div>
     <div class="titlebar-controls">
       <button class="titlebar-btn" id="btn-minimize">
         <svg width="10" height="1" viewBox="0 0 10 1"><rect width="10" height="1" fill="currentColor"/></svg>
@@ -45,7 +57,6 @@ window.addEventListener('DOMContentLoaded', () => {
     </div>
   `;
 
-  // Add styles
   const style = document.createElement('style');
   style.textContent = `
     #electron-titlebar {
@@ -69,11 +80,21 @@ window.addEventListener('DOMContentLoaded', () => {
       bottom: 0;
       -webkit-app-region: drag;
     }
-    .titlebar-title {
-      font-size: 12px;
-      font-weight: 500;
-      color: rgba(255,255,255,0.6);
+    .titlebar-center {
+      display: flex;
+      align-items: center;
+      gap: 8px;
       pointer-events: none;
+    }
+    .titlebar-logo {
+      flex-shrink: 0;
+    }
+    #titlebar-text {
+      font-family: 'gg sans', 'Noto Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      font-size: 12px;
+      font-weight: 600;
+      color: rgba(255,255,255,0.7);
+      letter-spacing: 0.3px;
     }
     .titlebar-controls {
       position: absolute;
@@ -110,7 +131,7 @@ window.addEventListener('DOMContentLoaded', () => {
   document.head.appendChild(style);
   document.body.prepend(titlebar);
 
-  // Add event listeners
+  // Button listeners
   document.getElementById('btn-minimize').addEventListener('click', () => {
     ipcRenderer.send('window-minimize');
   });
